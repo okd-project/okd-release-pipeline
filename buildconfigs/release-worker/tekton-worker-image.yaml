@@ -25,7 +25,8 @@ spec:
       # The GitHub CLI team won't publish official container images for some reason, so we need to build our own
       RUN curl -Lo gh-cli.rpm "https://github.com/cli/cli/releases/download/v2.20.2/gh_2.20.2_linux_amd64.rpm" && \
         dnf install -y jq pinentry ./gh-cli.rpm && \
-        rm ./gh-cli.rpm
+        rm ./gh-cli.rpm && \
+        dnf install -y openssl
     type: Dockerfile
   strategy:
     dockerStrategy: {}
