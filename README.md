@@ -10,18 +10,23 @@
 * `prow-okd-secret`
   * contains key `ci-prow-token`, which is a Service Account token for the Prow CI cluster, with permissions to tag release images. This token comes from the secret (sa-image-tagger-token-chsw6) stored in the app.ci cluster on the origin project.
 * `release-signing-gpg-key` - most probably not needed - to be confirmed
+* `okd-bot-matrix-user`, which contains an access token for Matrix (under key `token`)
 * `config-trusted-cabundle` : ca bundle
-2. oc apply -f okd-release-pipeline/templates/release-notes-templates.yaml
-3. oc apply -f okd-release-pipeline/buildconfigs/release-worker/tekton-worker-image.yaml
-4. oc apply -f okd-release-pipeline/pipelines/okd-release-pipeline.yaml
-5. oc apply -f okd-release-pipeline/tasks
-6. oc apply -f pipelines/01-batch-build-task.yaml
+2. ```yaml
+oc apply -k .
+```
 
 ## Run the pipeline
 Launch the pipeline run
-Example: 
+Example for stable release: 
 ```bash
-tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.13.0-0.okd-scos" --param release-imagestream="release-scos-next" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
+tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.12.0-0.okd-scos" --param release-imagestream="release-scos" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param is-release-latest=true --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
+
+```
+
+Example for 4.next release: 
+```bash
+tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.13.0-0.okd-scos" --param release-imagestream="release-scos-next" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
 
 ```
 

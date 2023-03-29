@@ -28,6 +28,25 @@ spec:
       name: github-org-repo
       type: string
       default: "cheesesashimi/okd-release-test"
+    - description: Determines if the release should be tagged latest
+      type: string
+      name: is-release-latest
+      default: "false"
+    - name: enable-notifications
+      type: string
+      default: "false"
+    - name: matrix-room
+      description: room id (in the format !<ROOM_ID>:<SERVER_NAME>)
+      type: string
+      default: "!nStsazaBvZCZQHPWTY:fedoraproject.org"
+    - name: matrix-endpoint
+      description: endpoint to connect to
+      type: string
+      default: "matrix.org"
+    - name: matrix-secret
+      description: kubernetes secret containing the token to post messages
+      type: string
+      default: "okd-bot-matrix-user"
   tasks:
     - name: build-pipeline-worker-image
       taskRef:
@@ -129,6 +148,8 @@ spec:
           value: $(tasks.pick-release.results.release-name)
         - name: github-org-repo
           value: $(params.github-org-repo)
+        - name: is-latest
+          value: $(params.is-release-latest)
       runAfter:
         - get-github-access-token
       workspaces:
@@ -150,5 +171,23 @@ spec:
           value: ci-prow-token
       runAfter:
         - create-github-release
+  finally:
+    - name: notify-matrix
+      params:
+        - name: matrix-secret
+          value: $(params.matrix-secret)
+        - name: endpoint
+          value: $(params.matrix-endpoint)
+        - name: room
+          value: $(params.matrix-room)
+        - name: message
+          value: "PipelineRun $(context.pipelineRun.name) - $(params.release-stream): $(tasks.status)"
+      when:
+        - input: $(params.enable-notifications)
+          operator: in
+          values: ["true"]
+      taskRef:
+        kind: Task
+        name: notify-matrix
   workspaces:
     - name: release-binaries
