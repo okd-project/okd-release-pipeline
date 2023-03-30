@@ -102,22 +102,35 @@ spec:
       workspaces:
         - name: release-binaries
           workspace: release-binaries
-    - name: create-github-release
-      taskRef:
-        name: create-github-release
+    - name: get-github-access-token
       params:
-        - name: release-name
-          value: $(tasks.pick-release.results.release-name)
-        - name: github-token-secret-name
-          value: gh-token
-        - name: github-token-secret-key
-          value: gh-okd-token
-        - name: github-org-repo
-          value: $(params.github-org-repo)
+        - name: github-app-id
+          value: '309584'
+        - name: github-app-installation-id
+          value: '35633111'
+        - name: githubapp-secret-name
+          value: githubapp-key
+        - name: githubapp-secret-key
+          value: githubapp-private-key
+      taskRef:
+        kind: Task
+        name: get-github-access-token
       runAfter:
         - prepare-binaries
         - prepare-release-notes
         - mirror
+    - name: create-github-release
+      taskRef:
+        name: create-github-release
+      params:
+        - name: token
+          value: $(tasks.get-github-access-token.results.githubapp-token)
+        - name: release-name
+          value: $(tasks.pick-release.results.release-name)
+        - name: github-org-repo
+          value: $(params.github-org-repo)
+      runAfter:
+        - get-github-access-token
       workspaces:
         - name: release-binaries
           workspace: release-binaries
