@@ -8,53 +8,53 @@ Only owners of the organization can create a GitHub App and then use this app fo
 Below all the steps needed to create a GitHub App
 
 1. Logged in as a **owner** of the organization
-![](https://i.imgur.com/CTfkoFB.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_1.png
 
 2. Click on <kbd>Developer settings</kbd> and then <kbd>GitHub Apps</kbd>
-![](https://i.imgur.com/anPOuKs.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_2.png
 
 3. Click on the <kbd>New GitHub App</kbd>
-![](https://i.imgur.com/FBcakjq.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_3.png
 
 4. Choose a **GitHub App Name**, **description** and **Homepage URL** (if the app does not have a page, add the git repo URL)
-![](https://i.imgur.com/fL3YN7C.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_4.png
 
 5. Keep the option **Expire user authorization token** enabled:
-![](https://i.imgur.com/eiG5sfp.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_5.png
 
 
 6. Disable the **Webhook** option in case it will not be used
-![](https://i.imgur.com/1Z5I4xk.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_6.png
 
 7. In the **Permissions** session choose the **Contents** since only releases permissions are needed (it is possible to change permissions later for other use cases). **Metadata** permission will be included automatically as Read-only (it is mandatory permission when 'Contents' is the selected option)
-![](https://i.imgur.com/q6P2XNn.png)
-![](https://i.imgur.com/KJ682Ms.png)
-![](https://i.imgur.com/VjEh9B6.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_7.png
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_7.1.png
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_7.2.png
 
 8. Keep **Only on this account** if it is not a public GitHub App and click on <kbd>Create GitHub App</kbd>
-![](https://i.imgur.com/r7lptBi.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_8.png
 
 At this point the GitHub App is created and now it is necessary only to generate a private key.
 
 9. Generate a private key for the GitHubApp clicking on **generate a private key**
-![](https://i.imgur.com/MUNkZWR.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_9.png
 
 10. Click on <kbd>Generate a private Key</kbd>. It will generate a private key and download a **.pem** file, save it in a safe place (it will be used as a kubernetes secret)
-![](https://i.imgur.com/IBjKZy5.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_10.png
 The file will looks like the one below:
-![](https://i.imgur.com/TOFbXz8.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/create_10.1.png
 
 ## Installing the GitHub App in the organization repositories
 After the creation of the GitHub App, it is possible to install it in the organization repositories that automation is needed. 
 
 1. Click on <kbd>Install App</kbd>
-![](https://i.imgur.com/94uHPkk.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/install_1.png
 
     1.1 Install it on okd-project
-![](https://i.imgur.com/jymynf4.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/install_1.1.png
 
 2. Select only the repos where the GitHub App (okd-tekton-token) is needed. In this use case okd-project/okd-scos repo is selected and after that click on <kbd>Install</kbd> 
-![](https://i.imgur.com/e3EXtaq.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/install_2.png
 
 
 At this point the GitHub App (okd-tekton-token) is installed in the repo **okd-scos**. This GitHub App will be able to deliver token when requested by an external app.
@@ -64,7 +64,7 @@ This sections shows the tekton task created to retrieve an access token calling 
 
 The name of the tekton task is get-github-access-token and showed in the picture below:
 
-![](https://i.imgur.com/C8Cn9HK.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/new_tekton_1.png
 
 This is a generic pipeline and can be reused in other pipelines that want to retrieve an access token from a GitHub App, the mandatory field to reuse this tekton task are:
 
@@ -75,7 +75,7 @@ This is a generic pipeline and can be reused in other pipelines that want to ret
 
 The parameter **github-app-id** is the ID of the GitHub App and only the organization owner has access to it. It can be found in the GitHub App settings
 
-![](https://i.imgur.com/Ztac3Pq.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/new_tekton_2.png
 
 The parameter **githubapp-secret-name** is the name of the kubernetes secret that will store the private key generated in the Creating a GitHub App section
 
@@ -83,7 +83,7 @@ The parameter **githubapp-secret-key** is the name of the field where the privat
 
 In our case the github-secret-name is **githubapp-key** and the github-secret-key is **githubapp-private-key**:
 
-![](https://i.imgur.com/jWQ5dVd.png)
+![](https://github.com/okd-project/okd-release-pipeline/tree/main/tasks/docs/assets/new_tekton_3.png
 
 
 The parameter **github-app-installation-id** is the ID generated by the installation of the GitHub App in a repository (since the GitHub App can be installed in more than one repository, the installation ID is the only way to identify which is the repo that the pipeline wants to call).
