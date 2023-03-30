@@ -78,7 +78,7 @@ spec:
          generated_jwt=$(sign)
 
          # show the jwt during testing
-         echo "Generated jwt: ${generated_jwt}"
+         #echo "Generated jwt: ${generated_jwt}"
          
          installation_id="$(params.github-app-installation-id)"
 
@@ -90,7 +90,7 @@ spec:
              -H "Accept: application/vnd.github.v3+json" \
              "${github_api_url}" )
 
-         echo "Token info: $tokens"
+         #echo "Token info: $tokens"
          # # extract the token
          token=$(echo "$tokens" | jq -r '.token')
          printf "%s" "$token" > $(results.githubapp-token.path)
