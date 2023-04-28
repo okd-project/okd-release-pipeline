@@ -1,0 +1,2 @@
+bases:
+  - okd-release-pipeline.yaml

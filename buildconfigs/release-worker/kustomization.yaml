@@ -1,0 +1,2 @@
+bases:
+  - tekton-worker-image.yaml

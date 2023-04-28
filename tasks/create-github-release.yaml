@@ -16,6 +16,10 @@ spec:
       name: github-org-repo
       type: string
       default: cheesesashimi/okd-release-test
+    - description: Determines if the release should be tagged latest
+      type: string
+      name: is-latest
+      default: "false"
   steps:
     - image: "image-registry.openshift-image-registry.svc:5000/okd-team/tekton-worker:latest"
       name: "create-github-release"
@@ -24,17 +28,26 @@ spec:
           value: $(params.release-name)
         - name: GH_TOKEN
           value: $(params.token)
+        - name: IS_LATEST
+          value: $(params.is-latest)
       script: |
         #!/usr/bin/env bash
         set -euxo pipefail
 
+        FLAG="--prerelease"
+        if $IS_LATEST ; then
+          FLAG="--latest"
+        fi
+
         cd "$(workspaces.release-binaries.path)/$RELEASE_NAME"
 
         # Create a new GitHub release and upload our assets
-        # See: https://cli.github.com/ for details on the official GitHub CLI tool
+        # See: https://cli.github.com/ for details 
+        # on the official GitHub CLI tool
         gh release create "$RELEASE_NAME" \
+          -t "$RELEASE_NAME" \
           --repo "$(params.github-org-repo)" \
-          --notes-file release-notes.txt \
+          $FLAG --notes-file release-notes.txt \
           ./*.tar.gz ./*.txt ./*.txt.asc
   workspaces:
     - name: release-binaries

@@ -1,0 +1,11 @@
+bases:
+  - 01-batch-build-task.yaml
+  - mirror-release.yaml
+  - prepare-release-binaries.yaml
+  - verify-release.yaml
+  - get-github-access-token.yaml
+  - create-github-release.yaml
+  - notify-matrix.yaml
+  - prepare-release-notes.yaml
+  - pick-release.yaml
+  - update-release-channel.yaml
