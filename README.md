@@ -20,13 +20,13 @@ oc apply -k .
 Launch the pipeline run
 Example for stable release: 
 ```bash
-tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.12.0-0.okd-scos" --param release-imagestream="release-scos" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param is-release-latest=true --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
+tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.13.0-0.okd-scos" --param release-imagestream="release-scos" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param is-release-latest=true --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
 
 ```
 
 Example for 4.next release: 
 ```bash
-tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.13.0-0.okd-scos" --param release-imagestream="release-scos-next" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
+tkn pipeline start okd-release-pipeline --param release-controller="https://origin-release.ci.openshift.org" --param release-stream="4.14.0-0.okd-scos" --param release-imagestream="release-scos-next" --param content-mirror-pushspec="quay.io/okd/scos-content" --param release-mirror-pushspec="quay.io/okd/scos-release" --param github-org-repo="okd-project/okd-scos" --param is-release-latest=false --param enable-notifications=true --param matrix-room=\!nStsazaBvZCZQHPWTY:fedoraproject.org --param matrix-endpoint=matrix.org --param matrix-secret=okd-bot-matrix-user --workspace name=release-binaries,volumeClaimTemplateFile=templates/claimTemplate.yaml  --pipeline-timeout 4h 
 
 ```
 
