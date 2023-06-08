@@ -12,7 +12,8 @@
 * `release-signing-gpg-key` - most probably not needed - to be confirmed
 * `okd-bot-matrix-user`, which contains an access token for Matrix (under key `token`)
 * `config-trusted-cabundle` : ca bundle
-2. ```yaml
+2. Apply:
+```bash
 oc apply -k .
 ```
 
