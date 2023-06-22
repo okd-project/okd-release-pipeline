@@ -1,0 +1,11 @@
+FROM registry.access.redhat.com/ubi9/ubi-init:latest
+LABEL maintainer="skhoury@redhat.com"
+
+RUN curl -Lo gh-cli.rpm "https://github.com/cli/cli/releases/download/v2.20.2/gh_2.20.2_linux_amd64.rpm"  && \
+        dnf install -y jq pinentry openssl ./gh-cli.rpm && \
+        rm ./gh-cli.rpm
+ADD oc.tar.xz /usr/bin/
+ADD kubectl.tar.xz /usr/bin/
+COPY uid_entrypoint.sh /usr/bin/
+WORKDIR /tmp
+ENTRYPOINT [ "/usr/bin/uid_entrypoint.sh" ]
