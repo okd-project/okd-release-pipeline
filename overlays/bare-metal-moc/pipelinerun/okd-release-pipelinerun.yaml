@@ -1,0 +1,50 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  creationTimestamp: "2023-06-21T13:54:00Z"
+  finalizers:
+  - chains.tekton.dev/pipelinerun
+  generateName: okd-release-pipeline-run-
+  generation: 1
+  labels:
+    tekton.dev/pipeline: okd-release-pipeline
+  name: okd-release-pipeline-run-kvhbf
+  namespace: okd-team
+  resourceVersion: "10417151"
+  uid: ae7d76a2-5b3b-4ad4-b837-1c24faaae0f9
+spec:
+  params:
+  - name: content-mirror-pushspec
+    value: quay.io/okd/scos-content
+  - name: enable-notifications
+    value: "true"
+  - name: github-org-repo
+    value: okd-project/okd-scos
+  - name: is-release-latest
+    value: "true"
+  - name: matrix-endpoint
+    value: matrix.org
+  - name: matrix-room
+    value: '!nStsazaBvZCZQHPWTY:fedoraproject.org'
+  - name: matrix-secret
+    value: okd-bot-matrix-user
+  - name: release-controller
+    value: https://origin-release.ci.openshift.org
+  - name: release-imagestream
+    value: release-scos
+  - name: release-mirror-pushspec
+    value: quay.io/okd/scos-release
+  - name: release-stream
+    value: 4.13.0-0.okd-scos
+  podTemplate:
+    nodeSelector:
+      kubernetes.io/hostname: host-192-168-111-72
+  pipelineRef:
+    name: okd-release-pipeline
+  timeouts:
+    pipeline: 4h0m0s
+  workspaces:
+  - name: release-binaries
+    persistentVolumeClaim:
+      claimName: pipeline-release-pvc
+
