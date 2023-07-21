@@ -7,4 +7,4 @@ bases:
   - ../../base/storage.k8s.io/storageclasses/
   - ../../base/tekton.dev/pipelines/
   - ../../base/tekton.dev/tasks/
-namespace: okd-team
+namespace: okd-coreos

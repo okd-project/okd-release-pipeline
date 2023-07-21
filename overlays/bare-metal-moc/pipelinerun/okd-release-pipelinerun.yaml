@@ -9,7 +9,7 @@ metadata:
   labels:
     tekton.dev/pipeline: okd-release-pipeline
   name: okd-release-pipeline-run-kvhbf
-  namespace: okd-team
+  namespace: okd-coreos
   resourceVersion: "10417151"
   uid: ae7d76a2-5b3b-4ad4-b837-1c24faaae0f9
 spec:

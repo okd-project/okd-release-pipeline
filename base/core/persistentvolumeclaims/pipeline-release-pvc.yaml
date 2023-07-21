@@ -2,7 +2,6 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: pipeline-release-pvc
-  namespace: okd-team
 spec:
   accessModes:
     - ReadWriteOnce

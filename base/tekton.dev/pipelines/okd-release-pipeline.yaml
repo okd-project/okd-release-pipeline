@@ -3,7 +3,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: okd-release-pipeline
-  namespace: okd-team
 spec:
   params:
     - description: The URL for the release controller to use

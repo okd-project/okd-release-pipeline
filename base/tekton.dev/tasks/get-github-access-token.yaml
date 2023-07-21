@@ -3,7 +3,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: get-github-access-token
-  namespace: okd-team
 spec:
   params:
     - description: GitHub App ID
