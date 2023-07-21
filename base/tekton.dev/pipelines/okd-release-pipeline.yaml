@@ -153,9 +153,7 @@ spec:
         - name: release-imagestream
           value: $(params.release-imagestream)
         - name: ci-cluster-secret-name
-          value: prow-okd-secret
-        - name: ci-cluster-secret-key
-          value: ci-prow-token
+          value: okd-prow-sa-auth
       runAfter:
         - create-github-release
   finally:

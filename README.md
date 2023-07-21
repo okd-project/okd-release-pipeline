@@ -7,8 +7,8 @@
 * `okd-quay-pull-secret`, which is a dockerconfig with permissions to push to `quay.io/okd/scos-release` and `quay.io/okd/scos-content`
 * `okd-release-gpg-signing-key`
   * contains key `private.key`, which is the GPG key used to sign the OKD release
-* `prow-okd-secret`
-  * contains key `ci-prow-token`, which is a Service Account token for the Prow CI cluster, with permissions to tag release images. This token comes from the secret (sa-image-tagger-token-chsw6) stored in the app.ci cluster on the origin project.
+* `okd-prow-sa-auth`
+  * contains key `token`, which is a Service Account token for the Prow CI cluster, with permissions to tag release images. This token comes from the secret (sa-image-tagger-token-chsw6) stored in the app.ci cluster on the origin project.
 * `okd-bot-matrix-user`, which contains an access token for Matrix (under key `token`)
 * `config-trusted-cabundle` : ca bundle
 2. Apply:

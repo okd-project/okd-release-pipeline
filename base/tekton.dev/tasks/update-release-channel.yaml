@@ -23,9 +23,6 @@ spec:
     - description: Secret name for CI cluster authentication
       name: ci-cluster-secret-name
       type: string
-    - description: Secret key name for CI cluster authentication
-      name: ci-cluster-secret-key
-      type: string
     - description: The release ImageStream in the CI cluster to target
       name: release-imagestream
       type: string
@@ -38,7 +35,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.ci-cluster-secret-name)
-              key: $(params.ci-cluster-secret-key)
+              key: token
       script: |
         #!/usr/bin/env bash
         set -euo pipefail
