@@ -1,15 +1,14 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: pipeline-release-pvc
-  namespace: okd-team
+  name: pipeline-release-stable-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 40Gi
-  volumeName: pipeline-release-pv
+  volumeName: pipeline-release-stable-pv
   storageClassName: local
   volumeMode: Filesystem
 

@@ -1,0 +1,3 @@
+bases:
+  - pipeline-release-next-pv.yaml
+  - pipeline-release-stable-pv.yaml

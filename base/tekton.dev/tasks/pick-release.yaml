@@ -3,7 +3,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: pick-release
-  namespace: okd-team
 spec:
   params:
     - description: The release controller to target

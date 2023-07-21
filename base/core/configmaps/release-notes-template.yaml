@@ -33,4 +33,3 @@ data:
 kind: ConfigMap
 metadata:
   name: release-notes-template
-  namespace: okd-team

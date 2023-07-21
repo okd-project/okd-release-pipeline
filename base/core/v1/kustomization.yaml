@@ -1,3 +1,0 @@
-bases:
-  - pipeline-release-pv.yaml
-  - pipeline-release-pvc.yaml

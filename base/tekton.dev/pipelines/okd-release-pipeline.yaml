@@ -3,7 +3,6 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: okd-release-pipeline
-  namespace: okd-team
 spec:
   params:
     - description: The URL for the release controller to use
@@ -46,7 +45,7 @@ spec:
     - name: matrix-secret
       description: kubernetes secret containing the token to post messages
       type: string
-      default: "okd-bot-matrix-user"
+      default: "okd-matrix-bot-auth"
   tasks:
     - name: pick-release
       taskRef:
@@ -72,10 +71,8 @@ spec:
           value: $(tasks.pick-release.results.release-name)
         - name: release-pullspec
           value: $(tasks.pick-release.results.release-pullspec)
-        - name: gpg-secret-name
-          value: okd-private-key
-        - name: gpg-secret-key-name
-          value: private.key
+        - name: gpg-signing-key
+          value: okd-release-gpg-signing-key
         - name: gpg-key-id
           value: maintainers@okd.io
       runAfter:
@@ -92,7 +89,7 @@ spec:
         - name: release-pullspec
           value: $(tasks.pick-release.results.release-pullspec)
         - name: image-push-secret-name
-          value: okd-okd-robot-pull-secret
+          value: okd-quay-pull-secret
         - name: release-mirror-pushspec
           value: $(params.release-mirror-pushspec)
         - name: content-mirror-pushspec
@@ -119,9 +116,7 @@ spec:
         - name: github-app-installation-id
           value: '35633111'
         - name: githubapp-secret-name
-          value: githubapp-key
-        - name: githubapp-secret-key
-          value: githubapp-private-key
+          value: okd-githubapp-auth
       taskRef:
         kind: Task
         name: get-github-access-token
@@ -157,9 +152,7 @@ spec:
         - name: release-imagestream
           value: $(params.release-imagestream)
         - name: ci-cluster-secret-name
-          value: prow-okd-secret
-        - name: ci-cluster-secret-key
-          value: ci-prow-token
+          value: okd-prow-sa-auth
       runAfter:
         - create-github-release
   finally:
