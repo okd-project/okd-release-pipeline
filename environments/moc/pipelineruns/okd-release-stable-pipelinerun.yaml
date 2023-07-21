@@ -36,5 +36,5 @@ spec:
   workspaces:
   - name: release-binaries
     persistentVolumeClaim:
-      claimName: pipeline-release-pvc
+      claimName: pipeline-release-stable-pvc
 
