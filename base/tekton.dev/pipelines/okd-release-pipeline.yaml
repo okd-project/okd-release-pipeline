@@ -92,7 +92,7 @@ spec:
         - name: release-pullspec
           value: $(tasks.pick-release.results.release-pullspec)
         - name: image-push-secret-name
-          value: okd-okd-robot-pull-secret
+          value: okd-quay-pull-secret
         - name: release-mirror-pushspec
           value: $(params.release-mirror-pushspec)
         - name: content-mirror-pushspec
