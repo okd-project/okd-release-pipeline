@@ -1,17 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  creationTimestamp: "2023-06-21T13:54:00Z"
-  finalizers:
-  - chains.tekton.dev/pipelinerun
-  generateName: okd-release-pipeline-run-
-  generation: 1
-  labels:
-    tekton.dev/pipeline: okd-release-pipeline
-  name: okd-release-pipeline-run-kvhbf
-  namespace: okd-coreos
-  resourceVersion: "10417151"
-  uid: ae7d76a2-5b3b-4ad4-b837-1c24faaae0f9
+  generateName: okd-release-stable-pipelinerun-
 spec:
   params:
   - name: content-mirror-pushspec
