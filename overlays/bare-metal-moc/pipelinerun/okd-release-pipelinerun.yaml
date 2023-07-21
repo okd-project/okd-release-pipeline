@@ -27,7 +27,7 @@ spec:
   - name: matrix-room
     value: '!nStsazaBvZCZQHPWTY:fedoraproject.org'
   - name: matrix-secret
-    value: okd-bot-matrix-user
+    value: okd-matrix-bot-auth
   - name: release-controller
     value: https://origin-release.ci.openshift.org
   - name: release-imagestream

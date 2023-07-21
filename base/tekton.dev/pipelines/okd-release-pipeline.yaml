@@ -46,7 +46,7 @@ spec:
     - name: matrix-secret
       description: kubernetes secret containing the token to post messages
       type: string
-      default: "okd-bot-matrix-user"
+      default: "okd-matrix-bot-auth"
   tasks:
     - name: pick-release
       taskRef:
