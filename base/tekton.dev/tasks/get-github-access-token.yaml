@@ -15,9 +15,6 @@ spec:
     - description: The Kubernet secret containing the private key for the GitHub App
       name: githubapp-secret-name
       type: string
-    - description: The private key for the GitHub App
-      name: githubapp-secret-key
-      type: string
   results:
     - name: githubapp-token
   steps:
@@ -28,7 +25,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.githubapp-secret-name)
-              key: $(params.githubapp-secret-key)
+              key: private.key
       script: |
         #!/usr/bin/env bash
 

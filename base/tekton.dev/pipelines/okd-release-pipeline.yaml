@@ -119,9 +119,7 @@ spec:
         - name: github-app-installation-id
           value: '35633111'
         - name: githubapp-secret-name
-          value: githubapp-key
-        - name: githubapp-secret-key
-          value: githubapp-private-key
+          value: okd-githubapp-auth
       taskRef:
         kind: Task
         name: get-github-access-token

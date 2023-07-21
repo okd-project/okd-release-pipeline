@@ -70,7 +70,6 @@ This is a generic pipeline and can be reused in other pipelines that want to ret
 
 - github-app-id
 - githubapp-secret-name
-- githubapp-secret-key
 - github-app-installation-id
 
 The parameter **github-app-id** is the ID of the GitHub App and only the organization owner has access to it. It can be found in the GitHub App settings
@@ -79,9 +78,7 @@ The parameter **github-app-id** is the ID of the GitHub App and only the organiz
 
 The parameter **githubapp-secret-name** is the name of the kubernetes secret that will store the private key generated in the Creating a GitHub App section
 
-The parameter **githubapp-secret-key** is the name of the field where the private key is stored inside of the kubernetes secret 
-
-In our case the github-secret-name is **githubapp-key** and the github-secret-key is **githubapp-private-key**:
+In our case the github-secret-name is **okd-githubapp-auth**:
 
 ![](assets/new_tekton_3.png)
 
@@ -111,8 +108,6 @@ At this point it is possible to call the task in the pipeline as the example bel
           value: '<YOUR GIT HUB APP INSTALLATION ID HERE>'
         - name: githubapp-secret-name
           value: <YOUR SECRET NAME WHERE THE PRIVATE KEY IS STORED>
-        - name: githubapp-secret-key
-          value: <THE NAME OF THE SECRET FIELD WHERE THE PRIVATE KEY IS STORED>
       taskRef:
         kind: Task
         name: get-github-access-token

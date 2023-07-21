@@ -2,8 +2,8 @@
 
 ## Prerequisites
 1. create or update the following secrets:
-* `githubapp-key`
-  * contains key `githubapp-private-key`, which is private key of GitHub App (okd-tekton-token) with permissions to create releases in `okd-scos` project
+* `okd-githubapp-auth`
+  * contains key `private.key`, which is private key of GitHub App (okd-tekton-token) with permissions to create releases in `okd-scos` project
 * `okd-quay-pull-secret`, which is a dockerconfig with permissions to push to `quay.io/okd/scos-release` and `quay.io/okd/scos-content`
 * `okd-private-key`
   * contains key `private.key`, which is the GPG key used to sign the OKD release
