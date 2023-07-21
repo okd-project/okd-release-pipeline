@@ -17,13 +17,9 @@ spec:
       type: string
       default: okd@not.real.go.away
     - description: The Kube secret name containing the GPG signing key
-      name: gpg-secret-name
+      name: gpg-signing-key
       type: string
-      default: release-signing-gpg-key
-    - description: The Kube secret key containing the GPG signing key
-      name: gpg-secret-key-name
-      type: string
-      default: fake-okd-signing-key.key
+      default: okd-release-gpg-signing-key
   steps:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "prepare-release-binaries"
@@ -50,7 +46,7 @@ spec:
         export GPG_TTY=$(tty)
         # Import our GPG key
         # Note: I couldn't get this to work by doing gpg --batch --imoprt for some reason.
-        cat "/var/gpg-signing-key/$(params.gpg-secret-key-name)" | gpg --batch --import
+        cat "/var/gpg-signing-key/private.key" | gpg --batch --import
 
         # Sign our release
         gpg --default-key "$(params.gpg-key-id)" --armor --detach-sign "$client_utils_dir/sha256sum.txt"
@@ -75,4 +71,4 @@ spec:
   volumes:
     - name: gpg-signing-key
       secret:
-        secretName: $(params.gpg-secret-name)
+        secretName: $(params.gpg-signing-key)

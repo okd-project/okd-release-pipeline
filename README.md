@@ -5,11 +5,10 @@
 * `okd-githubapp-auth`
   * contains key `private.key`, which is private key of GitHub App (okd-tekton-token) with permissions to create releases in `okd-scos` project
 * `okd-quay-pull-secret`, which is a dockerconfig with permissions to push to `quay.io/okd/scos-release` and `quay.io/okd/scos-content`
-* `okd-private-key`
+* `okd-release-gpg-signing-key`
   * contains key `private.key`, which is the GPG key used to sign the OKD release
 * `prow-okd-secret`
   * contains key `ci-prow-token`, which is a Service Account token for the Prow CI cluster, with permissions to tag release images. This token comes from the secret (sa-image-tagger-token-chsw6) stored in the app.ci cluster on the origin project.
-* `release-signing-gpg-key` - most probably not needed - to be confirmed
 * `okd-bot-matrix-user`, which contains an access token for Matrix (under key `token`)
 * `config-trusted-cabundle` : ca bundle
 2. Apply:
@@ -34,7 +33,7 @@ tkn pipeline start okd-release-pipeline --param release-controller="https://orig
 ## Annex - running a task individually
 ```bash
 
-tkn task start create-github-release   --param github-org-repo="okd-project/okd-scos"    --param github-token-secret-key="gh-okd-token"    --param github-token-secret-name="gh-token"    --param gpg-key-id="maintainers@okd.io"    --param gpg-secret-key-name="private.key"    --param gpg-secret-name="okd-private-key"    --param mirrored-release-pullspec="quay.io/okd/scos-release:4.12.0-0.okd-scos-2022-12-02-083740"    --param release-name="4.12.0-0.okd-scos-2022-12-02-083740"    --param os-release='NAME="CentOS Stream CoreOS"
+tkn task start create-github-release   --param github-org-repo="okd-project/okd-scos"    --param github-token-secret-key="gh-okd-token"    --param github-token-secret-name="gh-token"    --param gpg-key-id="maintainers@okd.io"    --param gpg-signing-key="okd-release-gpg-signing-key"    --param mirrored-release-pullspec="quay.io/okd/scos-release:4.12.0-0.okd-scos-2022-12-02-083740"    --param release-name="4.12.0-0.okd-scos-2022-12-02-083740"    --param os-release='NAME="CentOS Stream CoreOS"
     ID="scos"
     ID_LIKE="rhel fedora"
     VERSION="412.9.202211241749-0"
