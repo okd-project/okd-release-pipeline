@@ -26,7 +26,7 @@ oc create -f environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml
 
 Example for 4.next release: 
 ```bash
-oc create -f environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml
+oc create -f environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml
 
 ```
 

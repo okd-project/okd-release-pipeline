@@ -21,7 +21,7 @@ spec:
   - name: release-controller
     value: https://origin-release.ci.openshift.org
   - name: release-imagestream
-    value: release-scos
+    value: release-scos-next
   - name: release-mirror-pushspec
     value: quay.io/okd/scos-release
   - name: release-stream
