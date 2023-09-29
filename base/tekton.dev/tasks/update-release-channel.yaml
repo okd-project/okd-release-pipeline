@@ -34,7 +34,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.ci-cluster-secret-name)
-              key: token
+              key: ci-prow-token
       script: |
         #!/usr/bin/env bash
         set -euo pipefail
