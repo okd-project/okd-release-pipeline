@@ -24,7 +24,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: $(params.githubapp-secret-name)
-              key: private.key
+              key: githubapp-private-key
       script: |
         #!/usr/bin/env bash
 
