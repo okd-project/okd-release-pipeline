@@ -49,7 +49,9 @@ spec:
           --from-release "$RELEASE" \
           --mirror "$(params.content-mirror-pushspec)" \
           --to-image "$RELEASE_MIRROR" \
-          --name="$RELEASE_NAME"
+          --name="$RELEASE_NAME" \
+          --keep-manifest-list=true
+          
 
         printf "%s" "$RELEASE_MIRROR" > $(results.mirrored-pullspec.path)
       volumeMounts:
