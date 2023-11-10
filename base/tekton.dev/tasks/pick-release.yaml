@@ -29,7 +29,7 @@ spec:
 
         RELEASE_NAME="$(echo "$RELEASE" | jq -r '.name')"
         RELEASE_PULLSPEC="$(echo "$RELEASE" | jq -r '.pullSpec')"
-        DIGEST="$(oc adm release info --output=jsonpath='{.digest}' "$RELEASE_PULLSPEC")"
+        DIGEST="$(oc adm release info --output=jsonpath='{.listDigest}' "$RELEASE_PULLSPEC")"
 
         # Use printf instead of echo so we don't end up with newlines.
         printf "%s" "$RELEASE_NAME" > $(results.release-name.path)
