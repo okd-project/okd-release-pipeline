@@ -70,13 +70,13 @@ spec:
         - name: release-name
           value: $(tasks.pick-release.results.release-name)
         - name: release-pullspec
-          value: $(tasks.pick-release.results.release-pullspec)
+          value: $(tasks.mirror.results.mirrored-pullspec)
         - name: gpg-signing-key
           value: okd-release-gpg-signing-key
         - name: gpg-key-id
           value: maintainers@okd.io
       runAfter:
-        - verify-release
+        - mirror
       workspaces:
         - name: release-binaries
           workspace: release-binaries
