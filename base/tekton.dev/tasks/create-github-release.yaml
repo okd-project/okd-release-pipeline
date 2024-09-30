@@ -47,7 +47,7 @@ spec:
           -t "$RELEASE_NAME" \
           --repo "$(params.github-org-repo)" \
           $FLAG --notes-file release-notes.txt \
-          ./*.tar.gz ./*.txt ./*.txt.asc
+          ./*.tar.gz ./*.txt ./*.txt.asc ./*.zip
   workspaces:
     - name: release-binaries
       description: The location we store the signed release binaries in
