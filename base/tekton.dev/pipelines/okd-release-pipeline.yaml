@@ -12,6 +12,9 @@ spec:
     - description: The release stream to use (e.g., 4.12.0-0.okd, 4.12.0-0.okd-scos)
       name: release-stream
       type: string
+    - description: The release stream to target (e.g., 4-scos-stable, 4-scos-next)
+      name: target-release-stream
+      type: string
     - description: The app.ci imagestream to use for tagging (e.g., release or release-scos)
       name: release-imagestream
       type: string
@@ -55,6 +58,18 @@ spec:
           value: $(params.release-controller)
         - name: release-stream
           value: $(params.release-stream)
+    - name: pick-target-release-name
+      taskRef:
+        name: pick-target-release-name
+      params:
+        - name: release-imagestream
+          value: $(params.release-imagestream)
+        - name: ci-cluster-secret-name
+          value: okd-prow-sa-auth
+        - name: target-release-stream
+          value: $(params.target-release-stream)
+      runAfter:
+        - pick-release
     - name: verify-release
       taskRef:
         name: gpg-verify-release
@@ -68,7 +83,7 @@ spec:
         name: prepare-release-binaries
       params:
         - name: release-name
-          value: $(tasks.pick-release.results.release-name)
+          value: $(tasks.pick-target-release-name.results.target-release-name)
         - name: release-pullspec
           value: $(tasks.mirror.results.mirrored-pullspec)
         - name: gpg-signing-key
@@ -85,7 +100,7 @@ spec:
         name: mirror-release
       params:
         - name: release-name
-          value: $(tasks.pick-release.results.release-name)
+          value: $(tasks.pick-target-release-name.results.target-release-name)
         - name: release-pullspec
           value: $(tasks.pick-release.results.release-pullspec)
         - name: image-push-secret-name
@@ -101,7 +116,7 @@ spec:
         name: prepare-release-notes
       params:
         - name: release-name
-          value: $(tasks.pick-release.results.release-name)
+          value: $(tasks.pick-target-release-name.results.target-release-name)
         - name: mirrored-release-pullspec
           value: $(tasks.mirror.results.mirrored-pullspec)
       runAfter:
@@ -131,7 +146,7 @@ spec:
         - name: token
           value: $(tasks.get-github-access-token.results.githubapp-token)
         - name: release-name
-          value: $(tasks.pick-release.results.release-name)
+          value: $(tasks.pick-target-release-name.results.target-release-name)
         - name: github-org-repo
           value: $(params.github-org-repo)
         - name: is-latest
@@ -146,7 +161,7 @@ spec:
         name: update-release-channel
       params:
         - name: release-name
-          value: $(tasks.pick-release.results.release-name)
+          value: $(tasks.pick-target-release-name.results.target-release-name)
         - name: mirrored-release-pullspec
           value: $(tasks.mirror.results.mirrored-pullspec)
         - name: release-imagestream
