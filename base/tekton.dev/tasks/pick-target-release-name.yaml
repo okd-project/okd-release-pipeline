@@ -1,0 +1,85 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: pick-target-release-name
+spec:
+  params:
+    - description: The release controller to target
+      name: release-controller
+      type: string
+      default: "https://origin-release.ci.openshift.org"
+    - description: The CI cluster
+      name: ci-cluster
+      type: string
+      default: "https://api.ci.l2s4.p1.openshiftapps.com:6443"
+    - description: Secret name for CI cluster authentication
+      name: ci-cluster-secret-name
+      type: string
+    - description: The release ImageStream in the CI cluster to target.
+      name: release-imagestream
+      type: string
+      default: release-scos
+    - description: The oc project to target
+      name: oc-project
+      type: string
+      default: origin
+    - description: The release stream (e.g., 4-scos-stable) to target.
+      name: target-release-stream
+      type: string
+  results:
+    - name: target-release-name
+  steps:
+    - image: "quay.io/okd/tekton-worker:latest"
+      name: "pick-target-release-name"
+      env:
+        - name: CI_CLUSTER_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: $(params.ci-cluster-secret-name)
+              key: ci-prow-token
+      script: |
+        #!/usr/bin/env bash
+        set -xuo pipefail
+
+        # find the last release name. if the stream is stable, just query the controller to get it
+        # for next stream, query the imagestream as there could be rejected releases
+        if [[ "$(params.target-release-stream)" == "4-scos-stable" ]]; then
+            # The latest endpoint returns the latest accepted release, so we don't have to do any special filtering.
+            # See: https://github.com/openshift/release-controller/blob/master/pkg/release-controller/release.go#L493-L522
+            RELEASE="$(curl "$(params.release-controller)/api/v1/releasestream/$(params.target-release-stream)/latest")"
+            LAST_RELEASE_NAME="$(echo "$RELEASE" | jq -r '.name')"
+        else
+            oc login --token="$CI_CLUSTER_TOKEN" --server="$(params.ci-cluster)"
+            oc project "$(params.oc-project)"
+            LAST_RELEASE_NAME="$(oc get is "$(params.release-imagestream)" -ojson| jq '.status.tags[-1].tag')"
+        fi
+
+        # from the latest release name, construct the next release name
+        regex='okd-scos-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}'
+        if [[ "$LAST_RELEASE_NAME" =~ (ec|okd-scos)\.([0-9]+) ]]; then
+            # Extract the number after the dot
+            prefix=${BASH_REMATCH[1]}
+            number=${BASH_REMATCH[2]}
+            # Increment the number by 1
+            incremented_number=$((number + 1))
+            # Create the new string by replacing the old number with the new one
+            RELEASE_NAME="${LAST_RELEASE_NAME/$prefix.$number/$prefix.$incremented_number}"
+            printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
+        # Check for "okd-scos-" followed by a date timestamp
+        elif [[ "$LAST_RELEASE_NAME" =~ $regex ]]; then
+            if [[ "$LAST_RELEASE_NAME" =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+                prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
+                if [[ "$(params.release-imagestream)" == *"next" ]]; then
+                    suffix="-okd-scos.ec.0"
+                else
+                    suffix="-okd-scos.0"
+                fi
+                RELEASE_NAME="$prefix$suffix"
+                printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
+            else
+                echo "Invalid release found!"
+            fi
+        else
+            echo "No previous release found!"
+        fi

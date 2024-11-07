@@ -7,4 +7,5 @@ bases:
   - notify-matrix.yaml
   - prepare-release-notes.yaml
   - pick-release.yaml
+  - pick-target-release-name.yaml
   - update-release-channel.yaml

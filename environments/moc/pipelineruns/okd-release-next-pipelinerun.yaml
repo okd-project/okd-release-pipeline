@@ -26,6 +26,8 @@ spec:
     value: quay.io/okd/scos-release
   - name: release-stream
     value: 4.17.0-0.okd-scos
+  - name: target-release-stream
+    value: 4-scos-next
   podTemplate:
     nodeSelector:
       kubernetes.io/hostname: host-192-168-111-72
