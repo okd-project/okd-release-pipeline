@@ -68,6 +68,8 @@ spec:
           value: okd-prow-sa-auth
         - name: target-release-stream
           value: $(params.target-release-stream)
+        - name: picked-release-name
+          value: $(tasks.pick-release.results.release-name)
       runAfter:
         - pick-release
     - name: verify-release
