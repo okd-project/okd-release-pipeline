@@ -53,11 +53,11 @@ After the creation of the GitHub App, it is possible to install it in the organi
     1.1 Install it on okd-project
 ![](assets/install_1.1.png)
 
-2. Select only the repos where the GitHub App (okd-tekton-token) is needed. In this use case okd-project/okd-scos repo is selected and after that click on <kbd>Install</kbd> 
+2. Select only the repos where the GitHub App (okd-tekton-token) is needed. In this use case okd-project/okd repo is selected and after that click on <kbd>Install</kbd> 
 ![](assets/install_2.png)
 
 
-At this point the GitHub App (okd-tekton-token) is installed in the repo **okd-scos**. This GitHub App will be able to deliver token when requested by an external app.
+At this point the GitHub App (okd-tekton-token) is installed in the repo **okd**. This GitHub App will be able to deliver token when requested by an external app.
 
 ## New Tekton Task
 This sections shows the tekton task created to retrieve an access token calling the GitHub App created in the previous steps. Also, it shows the parameters required by this tekton task.
