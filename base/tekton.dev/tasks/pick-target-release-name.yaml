@@ -27,6 +27,9 @@ spec:
     - description: The release stream (e.g., 4-scos-stable) to target.
       name: target-release-stream
       type: string
+    - description: The name of the release picked for promotion
+      name: picked-release-name
+      type: string
   results:
     - name: target-release-name
   steps:
@@ -55,31 +58,32 @@ spec:
             LAST_RELEASE_NAME="$(oc get is "$(params.release-imagestream)" -ojson| jq '.status.tags[-1].tag')"
         fi
 
+        OKD_VERSION=$(echo "$(params.picked-release-name)" | cut -d '-' -f 1)
+        LAST_OKD_VERSION=$(echo "$LAST_RELEASE_NAME" | tr -d '"' | cut -d '-' -f 1)
         # from the latest release name, construct the next release name
         regex='okd-scos-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}'
-        if [[ "$LAST_RELEASE_NAME" =~ (ec|okd-scos)\.([0-9]+) ]]; then
+        if [[ "$LAST_RELEASE_NAME" =~ (okd-scos|okd-scos.ec)\.([0-9]+) ]]; then
             # Extract the number after the dot
             prefix=${BASH_REMATCH[1]}
             number=${BASH_REMATCH[2]}
             # Increment the number by 1
-            incremented_number=$((number + 1))
-            # Create the new string by replacing the old number with the new one
-            RELEASE_NAME="${LAST_RELEASE_NAME/$prefix.$number/$prefix.$incremented_number}"
+            if [[ "$OKD_VERSION" == "$LAST_OKD_VERSION" ]]; then
+                incremented_number=$((number + 1))
+            else
+                incremented_number="0"
+            fi
+            # Create the new release string concatenating release number with okd-scos
+            RELEASE_NAME="$OKD_VERSION-$prefix.$incremented_number"
             printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
         # Check for "okd-scos-" followed by a date timestamp
         elif [[ "$LAST_RELEASE_NAME" =~ $regex ]]; then
-            if [[ "$LAST_RELEASE_NAME" =~ ([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
-                prefix="${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}"
-                if [[ "$(params.release-imagestream)" == *"next" ]]; then
-                    suffix="-okd-scos.ec.0"
-                else
-                    suffix="-okd-scos.0"
-                fi
-                RELEASE_NAME="$prefix$suffix"
-                printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
+            if [[ "$(params.release-imagestream)" == *"next" ]]; then
+                suffix="-okd-scos.ec.0"
             else
-                echo "Invalid release found!"
+                suffix="-okd-scos.0"
             fi
+            RELEASE_NAME="$OKD_VERSION$suffix"
+            printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
         else
             echo "No previous release found!"
         fi
