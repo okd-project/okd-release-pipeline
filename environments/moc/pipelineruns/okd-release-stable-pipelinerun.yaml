@@ -9,7 +9,7 @@ spec:
   - name: enable-notifications
     value: "true"
   - name: github-org-repo
-    value: okd-project/okd-scos
+    value: okd-project/okd
   - name: is-release-latest
     value: "true"
   - name: matrix-endpoint
