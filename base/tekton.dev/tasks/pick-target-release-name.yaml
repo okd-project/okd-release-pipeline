@@ -55,7 +55,7 @@ spec:
         else
             oc login --token="$CI_CLUSTER_TOKEN" --server="$(params.ci-cluster)"
             oc project "$(params.oc-project)"
-            LAST_RELEASE_NAME="$(oc get is "$(params.release-imagestream)" -ojson| jq '.status.tags[-1].tag')"
+            LAST_RELEASE_NAME="$(oc get is "$(params.release-imagestream)" -ojson| jq '.status.tags | sort_by(.items[0].created) | last.tag')"
         fi
 
         OKD_VERSION=$(echo "$(params.picked-release-name)" | cut -d '-' -f 1)
