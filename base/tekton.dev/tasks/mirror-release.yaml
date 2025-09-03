@@ -11,6 +11,9 @@ spec:
     - description: The release pullspec to target
       name: release-pullspec
       type: string
+    - description: The release stream to target
+      name: release-stream
+      type: string
     - description: The image push secret name to use
       name: image-push-secret-name
       type: string
@@ -43,6 +46,12 @@ spec:
         # Import the public key for verification
         curl -Lv "$(params.gpg-public-key-url)" | gpg --import
 
+        # Grab all of the previous releases for cincinnati
+        PREVIOUS_RELEASES="$(curl https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted | jq -r '.["$(params.release-stream)"] | join(",")')"
+
+        # remove any release name that's is less than 4.16
+        PREVIOUS_RELEASES="$(echo "$PREVIOUS_RELEASES" | sed 's/4.1[0-5].*//g')"
+
         oc adm release new \
           --request-timeout=60s \
           --registry-config="/secret/image-push-secret/.dockerconfigjson" \
@@ -50,7 +59,8 @@ spec:
           --mirror "$(params.content-mirror-pushspec)" \
           --to-image "$RELEASE_MIRROR" \
           --name="$RELEASE_NAME" \
-          --keep-manifest-list=true
+          --keep-manifest-list=true \
+          --previous="$PREVIOUS_RELEASES"
           
 
         printf "%s" "$RELEASE_MIRROR" > $(results.mirrored-pullspec.path)
