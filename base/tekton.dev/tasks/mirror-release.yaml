@@ -59,7 +59,7 @@ spec:
         PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
 
         # Get the last 5 previous major.minor releases
-        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 5)"
+        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
 
         # Get all current major.minor releases and combine them
         CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\.")"
@@ -67,6 +67,11 @@ spec:
 
         # Convert the filtered releases to a comma-separated string
         PREVIOUS_RELEASES=$(echo "$FILTERED_RELEASES" | tr '\n' ',' | sed 's/,$//')
+
+        # check if the filtered releases is empty or it's not a valid comma-separated string
+        if ! echo "$PREVIOUS_RELEASES" | grep -q ','; then
+          echo "PREVIOUS_RELEASES is not a valid comma-separated string"
+        fi
 
         oc adm release new \
           --request-timeout=60s \
