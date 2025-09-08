@@ -11,6 +11,9 @@ spec:
     - description: The release pullspec to target
       name: release-pullspec
       type: string
+    - description: The release stream to target
+      name: release-stream
+      type: string
     - description: The image push secret name to use
       name: image-push-secret-name
       type: string
@@ -43,6 +46,33 @@ spec:
         # Import the public key for verification
         curl -Lv "$(params.gpg-public-key-url)" | gpg --import
 
+        # Grab all of the previous releases for cincinnati
+        ALL_RELEASES="$(curl https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted | jq -r '.["$(params.release-stream)"][]')"
+
+        # Get the current major.minor version i.e. 4.19.x-okd-scos.x turns to 4.19
+        CURRENT_MAJOR_MINOR="$(echo "$RELEASE_NAME" | cut -d. -f1-2)"
+        CURRENT_MAJOR="$(echo "$CURRENT_MAJOR_MINOR" | cut -d. -f1)"
+        CURRENT_MINOR="$(echo "$CURRENT_MAJOR_MINOR" | cut -d. -f2)"
+
+        # Get previous major.minor version for upgrade path
+        PREV_MINOR="$((CURRENT_MINOR - 1))"
+        PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
+
+        # Get the last 5 previous major.minor releases
+        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
+
+        # Get all current major.minor releases and combine them
+        CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\.")"
+        FILTERED_RELEASES=$(echo -e "$PREV_RELEASES\n$CURRENT_RELEASES" | grep -v '^$')
+
+        # Convert the filtered releases to a comma-separated string
+        PREVIOUS_RELEASES=$(echo "$FILTERED_RELEASES" | tr '\n' ',' | sed 's/,$//')
+
+        # check if the filtered releases is empty or it's not a valid comma-separated string
+        if ! echo "$PREVIOUS_RELEASES" | grep -q ','; then
+          echo "PREVIOUS_RELEASES is not a valid comma-separated string"
+        fi
+
         oc adm release new \
           --request-timeout=60s \
           --registry-config="/secret/image-push-secret/.dockerconfigjson" \
@@ -50,7 +80,8 @@ spec:
           --mirror "$(params.content-mirror-pushspec)" \
           --to-image "$RELEASE_MIRROR" \
           --name="$RELEASE_NAME" \
-          --keep-manifest-list=true
+          --keep-manifest-list=true \
+          --previous="$PREVIOUS_RELEASES"
           
 
         printf "%s" "$RELEASE_MIRROR" > $(results.mirrored-pullspec.path)
