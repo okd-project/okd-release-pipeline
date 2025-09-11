@@ -39,6 +39,7 @@ spec:
 
         RELEASE="$(params.release-pullspec)"
         RELEASE_NAME="$(params.release-name)"
+        RELEASE_STREAM="$(params.release-stream)"
 
         CONTENT_MIRROR="$(params.content-mirror-pushspec):${RELEASE_NAME}"
         RELEASE_MIRROR="$(params.release-mirror-pushspec):${RELEASE_NAME}"
@@ -47,7 +48,7 @@ spec:
         curl -Lv "$(params.gpg-public-key-url)" | gpg --import
 
         # Grab all of the previous releases for cincinnati
-        ALL_RELEASES="$(curl https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted | jq -r '.["$(params.release-stream)"][]')"
+        ALL_RELEASES="$(curl https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted | jq -r ".["$(RELEASE_STREAM)"][]")"
 
         # Get the current major.minor version i.e. 4.19.x-okd-scos.x turns to 4.19
         CURRENT_MAJOR_MINOR="$(echo "$RELEASE_NAME" | cut -d. -f1-2)"
@@ -58,7 +59,7 @@ spec:
         PREV_MINOR="$((CURRENT_MINOR - 1))"
         PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
 
-        # Get the last 5 previous major.minor releases
+        # Get the last 1 previous major.minor releases
         PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
 
         # Get all current major.minor releases and combine them
