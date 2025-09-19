@@ -25,7 +25,7 @@ spec:
   - name: release-mirror-pushspec
     value: quay.io/okd/scos-release
   - name: release-stream
-    value: 4.19.0-0.okd-scos
+    value: 4.20.0-0.okd-scos
   - name: target-release-stream
     value: 4-scos-stable
   podTemplate:
