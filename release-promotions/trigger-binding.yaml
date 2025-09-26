@@ -1,0 +1,9 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: cluster-command-binding
+  namespace: okd-coreos  
+spec:
+  params:
+    - name: trigger-source
+      value: $(body.message)
