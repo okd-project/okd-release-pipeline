@@ -1,0 +1,11 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: tekton-pipelinerun-creator
+rules:
+- apiGroups: ["tekton.dev"]
+  resources: ["pipelineruns"]
+  verbs: ["create"]
+- apiGroups: ["triggers.tekton.dev"]
+  resources: ["eventlisteners", "triggertemplates", "triggerbindings", "triggers", "interceptors", "clusterinterceptors"]
+  verbs: ["get", "list", "watch"]

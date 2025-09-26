@@ -1,0 +1,17 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: cluster-command-template
+  namespace: okd-coreos
+spec:
+  params:
+  - name: trigger-source
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: cluster-command-run-
+      spec:
+        serviceAccountName: tekton-cluster-access
+        pipelineRef:
+          name: cluster-command-pipeline
