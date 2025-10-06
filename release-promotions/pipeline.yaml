@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: cluster-command-pipeline
+  namespace: okd-coreos
+spec:
+  tasks:
+    - name: run-command
+      taskRef:
+        name: cluster-command-task

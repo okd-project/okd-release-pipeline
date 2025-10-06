@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: cluster-command-task
+  namespace: okd-coreos
+spec:
+  steps:
+    - name: run-cluster-command
+      image: quay.io/openshift/origin-cli:latest
+      script: |
+        #!/bin/bash
+        set -euo pipefail
+
+        echo "[INFO] Promoting OKD releases:"
+
+        echo "[INFO] Applying: okd-release-next-pipelinerun.yaml"
+        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml
+
+        echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
+        sleep 1800
+
+        echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml"
+        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml
+
+        echo "[INFO] OKD promotion jobs done!"
