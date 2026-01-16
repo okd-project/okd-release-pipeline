@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cron-trigger-cluster-command
+  namespace: okd-coreos
+spec:
+  suspend: false 
+  schedule: "0 5 * * 1"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: curl-trigger
+              image: curlimages/curl:latest
+              command: ["/bin/sh"]
+              args:
+                - "-c"
+                - |
+                  echo "[INFO] Scheduled OKD Release Promotion - promoting both releases"
+                  curl -X POST \
+                  http://el-cluster-command-listener.okd-coreos.svc.cluster.local:8080 \
+                  -H 'Content-Type: application/json' \
+                  -d '{"message":"scheduled", "next":"true", "stable":"true", "next-yaml":"https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml", "stable-yaml":"https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml"}'
