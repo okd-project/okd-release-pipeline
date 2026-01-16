@@ -4,6 +4,15 @@ metadata:
   name: cluster-command-task
   namespace: okd-coreos
 spec:
+  params:
+    - name: next
+      description: "Promote next release"
+    - name: stable
+      description: "Promote stable release"
+    - name: next-yaml
+      description: "URL or path to the next release pipeline YAML"
+    - name: stable-yaml
+      description: "URL or path to the stable release YAML"
   steps:
     - name: run-cluster-command
       image: quay.io/openshift/origin-cli:latest
@@ -11,15 +20,30 @@ spec:
         #!/bin/bash
         set -euo pipefail
 
-        echo "[INFO] Promoting OKD releases:"
+        # Parse parameters
+        next="$(params.next)"
+        stable="$(params.stable)"
+        next_yaml="$(params.next-yaml)"
+        stable_yaml="$(params.stable-yaml)"
 
-        echo "[INFO] Applying: okd-release-next-pipelinerun.yaml"
-        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml
+        echo "[INFO] Promoting OKD releases - next: $next, stable: $stable"
 
-        echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
-        sleep 1800
+        # Check if next should be promoted
+        if [[ "$next" == "true" ]]; then
+          echo "[INFO] Applying: okd-release-next-pipelinerun.yaml from $next_yaml"
+          oc create -f "$next_yaml"
+        fi
 
-        echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml"
-        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml
+        # Sleep only if both releases are being promoted
+        if [[ "$next" == "true" && "$stable" == "true" ]]; then
+          echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
+          sleep 1800
+        fi
+
+        # Check if stable should be promoted
+        if [[ "$stable" == "true" ]]; then
+          echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml from $stable_yaml"
+          oc create -f "$stable_yaml"
+        fi
 
         echo "[INFO] OKD promotion jobs done!"

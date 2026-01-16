@@ -4,7 +4,25 @@ metadata:
   name: cluster-command-pipeline
   namespace: okd-coreos
 spec:
+  params:
+    - name: next
+      description: "Promote next release"
+    - name: stable
+      description: "Promote stable release"
+    - name: next-yaml
+      description: "URL or path to the next release pipeline YAML"
+    - name: stable-yaml
+      description: "URL or path to the stable release pipeline YAML"
   tasks:
     - name: run-command
       taskRef:
         name: cluster-command-task
+      params:
+        - name: next
+          value: $(params.next)
+        - name: stable
+          value: $(params.stable)
+        - name: next-yaml
+          value: $(params.next-yaml)
+        - name: stable-yaml
+          value: $(params.stable-yaml)

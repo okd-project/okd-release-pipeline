@@ -6,6 +6,14 @@ metadata:
 spec:
   params:
   - name: trigger-source
+  - name: next
+    default: "false"
+  - name: stable
+    default: "false"
+  - name: next-yaml
+    default: "https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml"
+  - name: stable-yaml
+    default: "https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml"
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
@@ -15,3 +23,12 @@ spec:
         serviceAccountName: tekton-cluster-access
         pipelineRef:
           name: cluster-command-pipeline
+        params:
+        - name: next
+          value: $(tt.params.next)
+        - name: stable
+          value: $(tt.params.stable)
+        - name: next-yaml
+          value: $(tt.params.next-yaml)
+        - name: stable-yaml
+          value: $(tt.params.stable-yaml)

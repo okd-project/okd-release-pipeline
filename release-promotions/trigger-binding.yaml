@@ -7,3 +7,11 @@ spec:
   params:
     - name: trigger-source
       value: $(body.message)
+    - name: next
+      value: $(body.next)
+    - name: stable
+      value: $(body.stable)
+    - name: next-yaml
+      value: $(body.next-yaml)
+    - name: stable-yaml
+      value: $(body.stable-yaml)
