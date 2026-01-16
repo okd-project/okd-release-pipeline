@@ -1,0 +1,1 @@
+oc logs xxxxxx -c step-run-cluster-command  -n okd-coreos

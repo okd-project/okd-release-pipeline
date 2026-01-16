@@ -18,16 +18,8 @@ spec:
               args:
                 - "-c"
                 - |
-<<<<<<< HEAD
                   echo "[INFO] Scheduled OKD Release Promotion - promoting both releases"
                   curl -X POST \
                   http://el-cluster-command-listener.okd-coreos.svc.cluster.local:8080 \
                   -H 'Content-Type: application/json' \
                   -d '{"message":"scheduled", "next":"true", "stable":"true", "next-yaml":"https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml", "stable-yaml":"https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml"}'
-=======
-                  echo "[INFO] Triggering EventListener..."
-                  curl -X POST \
-                  http://el-cluster-command-listener.okd-coreos.svc.cluster.local:8080 \
-                  -H 'Content-Type: application/json' \
-                  -d '{"message":"trigger"}'
->>>>>>> 22eeafa7765dbbe0ad86379e4993ceb4d0c2e604
