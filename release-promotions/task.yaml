@@ -4,6 +4,7 @@ metadata:
   name: cluster-command-task
   namespace: okd-coreos
 spec:
+<<<<<<< HEAD
   params:
     - name: next
       description: "Promote next release"
@@ -13,6 +14,8 @@ spec:
       description: "URL or path to the next release pipeline YAML"
     - name: stable-yaml
       description: "URL or path to the stable release YAML"
+=======
+>>>>>>> 22eeafa7765dbbe0ad86379e4993ceb4d0c2e604
   steps:
     - name: run-cluster-command
       image: quay.io/openshift/origin-cli:latest
@@ -20,6 +23,7 @@ spec:
         #!/bin/bash
         set -euo pipefail
 
+<<<<<<< HEAD
         # Parse parameters
         next="$(params.next)"
         stable="$(params.stable)"
@@ -45,5 +49,17 @@ spec:
           echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml from $stable_yaml"
           oc create -f "$stable_yaml"
         fi
+=======
+        echo "[INFO] Promoting OKD releases:"
+
+        echo "[INFO] Applying: okd-release-next-pipelinerun.yaml"
+        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml
+
+        echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
+        sleep 1800
+
+        echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml"
+        oc create -f https://raw.githubusercontent.com/okd-project/okd-release-pipeline/main/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml
+>>>>>>> 22eeafa7765dbbe0ad86379e4993ceb4d0c2e604
 
         echo "[INFO] OKD promotion jobs done!"

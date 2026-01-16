@@ -4,6 +4,7 @@ metadata:
   name: cluster-command-pipeline
   namespace: okd-coreos
 spec:
+<<<<<<< HEAD
   params:
     - name: next
       description: "Promote next release"
@@ -26,3 +27,9 @@ spec:
           value: $(params.next-yaml)
         - name: stable-yaml
           value: $(params.stable-yaml)
+=======
+  tasks:
+    - name: run-command
+      taskRef:
+        name: cluster-command-task
+>>>>>>> 22eeafa7765dbbe0ad86379e4993ceb4d0c2e604
