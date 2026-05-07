@@ -30,6 +30,8 @@ spec:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "update-release-channel"
       env:
+        - name: HOME
+          value: /tekton/home
         - name: CI_CLUSTER_TOKEN
           valueFrom:
             secretKeyRef:

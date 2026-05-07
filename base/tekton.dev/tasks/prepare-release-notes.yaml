@@ -15,6 +15,8 @@ spec:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "prepare-release-notes"
       env:
+        - name: HOME
+          value: /tekton/home
         - name: RELEASE_NAME
           value: $(params.release-name)
         - name: MIRRORED_RELEASE_PULLSPEC

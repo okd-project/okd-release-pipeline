@@ -23,6 +23,8 @@ spec:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "create-github-release"
       env:
+        - name: HOME
+          value: /tekton/home
         - name: RELEASE_NAME
           value: $(params.release-name)
         - name: GH_TOKEN

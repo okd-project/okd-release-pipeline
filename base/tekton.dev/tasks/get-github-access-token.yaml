@@ -19,7 +19,9 @@ spec:
   steps:
     - name: get-token
       image: quay.io/okd/tekton-worker:latest
-      env: 
+      env:
+        - name: HOME
+          value: /tekton/home
         - name: PRIVATE_KEY
           valueFrom:
             secretKeyRef:
