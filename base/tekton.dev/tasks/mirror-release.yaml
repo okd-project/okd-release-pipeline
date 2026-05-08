@@ -11,8 +11,8 @@ spec:
     - description: The release pullspec to target
       name: release-pullspec
       type: string
-    - description: The release stream to target
-      name: release-stream
+    - description: The target release stream to promote to
+      name: target-release-stream
       type: string
     - description: The image push secret name to use
       name: image-push-secret-name
@@ -33,13 +33,18 @@ spec:
   steps:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "mirror-release-to-quay"
+      env:
+        - name: HOME
+          value: /tekton/home
+        - name: GNUPGHOME
+          value: /tekton/home/.gnupg
       script: |
         #!/usr/bin/env bash
         set -euxo pipefail
 
         RELEASE="$(params.release-pullspec)"
         RELEASE_NAME="$(params.release-name)"
-        RELEASE_STREAM="$(params.release-stream)"
+        TARGET_RELEASE_STREAM="$(params.target-release-stream)"
 
         CONTENT_MIRROR="$(params.content-mirror-pushspec):${RELEASE_NAME}"
         RELEASE_MIRROR="$(params.release-mirror-pushspec):${RELEASE_NAME}"
@@ -47,8 +52,9 @@ spec:
         # Import the public key for verification
         curl -Lv "$(params.gpg-public-key-url)" | gpg --import
 
-        # Grab all of the previous releases for cincinnati
-        ALL_RELEASES="$(curl https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted | jq -r ".[\"${RELEASE_STREAM}\"][]")"
+        # Grab all of the previous accapted releases for cincinnati
+        ACCEPTED_STREAMS="$(curl -s https://amd64.origin.releases.ci.openshift.org/api/v1/releasestreams/accepted)"
+        ALL_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r ".[\"${TARGET_RELEASE_STREAM}\"][]")"
 
         # Get the current major.minor version i.e. 4.19.x-okd-scos.x turns to 4.19
         CURRENT_MAJOR_MINOR="$(echo "$RELEASE_NAME" | cut -d. -f1-2)"
@@ -83,7 +89,6 @@ spec:
           --name="$RELEASE_NAME" \
           --keep-manifest-list=true \
           --previous="$PREVIOUS_RELEASES"
-          
 
         printf "%s" "$RELEASE_MIRROR" > $(results.mirrored-pullspec.path)
       volumeMounts:

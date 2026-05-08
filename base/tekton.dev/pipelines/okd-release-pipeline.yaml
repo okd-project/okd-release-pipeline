@@ -113,6 +113,8 @@ spec:
           value: $(params.content-mirror-pushspec)
         - name: release-stream
           value: $(params.release-stream)
+        - name: target-release-stream
+          value: $(params.target-release-stream)
       runAfter:
         - verify-release
     - name: prepare-release-notes
