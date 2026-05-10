@@ -19,6 +19,9 @@ spec:
   steps:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "pick-release"
+      env:
+        - name: HOME
+          value: /tekton/home
       script: |
         #!/usr/bin/env bash
         set -xuo pipefail

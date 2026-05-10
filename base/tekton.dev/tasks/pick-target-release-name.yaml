@@ -36,6 +36,8 @@ spec:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "pick-target-release-name"
       env:
+        - name: HOME
+          value: /tekton/home
         - name: CI_CLUSTER_TOKEN
           valueFrom:
             secretKeyRef:
@@ -45,13 +47,28 @@ spec:
         #!/usr/bin/env bash
         set -xuo pipefail
 
-        # find the last release name. if the stream is stable, just query the controller to get it
-        # for next stream, query the imagestream as there could be rejected releases
+        # find the last release name (highest version number)
+        # for stable stream, query GitHub releases to find the highest version (includes rejected releases that were pushed)
+        # for next stream, query the imagestream
         if [[ "$(params.target-release-stream)" == "4-scos-stable" ]]; then
-            # The latest endpoint returns the latest accepted release, so we don't have to do any special filtering.
-            # See: https://github.com/openshift/release-controller/blob/master/pkg/release-controller/release.go#L493-L522
-            RELEASE="$(curl "$(params.release-controller)/api/v1/releasestream/$(params.target-release-stream)/latest")"
-            LAST_RELEASE_NAME="$(echo "$RELEASE" | jq -r '.name')"
+            # Extract version from picked release to match only same major.minor releases
+            OKD_VERSION=$(echo "$(params.picked-release-name)" | cut -d '-' -f 1)
+            
+            # Query release controller API to get ALL releases (including rejected ones)
+            # Using amd64.origin.releases.ci.openshift.org which has all releases
+            ALL_RELEASES="$(curl -s "https://amd64.origin.releases.ci.openshift.org/api/v1/releasestream/$(params.target-release-stream)/tags")"
+            
+            # Find the highest numbered release for this OKD version pattern (e.g., 4.21.0-okd-scos.N)
+            LAST_RELEASE_NAME="$(echo "$ALL_RELEASES" | jq -r --arg ver "$OKD_VERSION" '
+              [.tags[]? | .name | select(startswith($ver + "-okd-scos.")) | select(test("^" + $ver + "-okd-scos\\.[0-9]+$"))] |
+              sort_by(split(".") | last | tonumber) | last // empty
+            ')"
+            
+            # If no numbered releases found, fall back to latest accepted from release controller
+            if [[ -z "$LAST_RELEASE_NAME" ]]; then
+                RELEASE="$(curl "$(params.release-controller)/api/v1/releasestream/$(params.target-release-stream)/latest")"
+                LAST_RELEASE_NAME="$(echo "$RELEASE" | jq -r '.name')"
+            fi
         else
             oc login --token="$CI_CLUSTER_TOKEN" --server="$(params.ci-cluster)"
             oc project "$(params.oc-project)"

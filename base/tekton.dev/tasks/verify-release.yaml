@@ -15,6 +15,11 @@ spec:
   steps:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "gpg-verify"
+      env:
+        - name: HOME
+          value: /tekton/home
+        - name: GNUPGHOME
+          value: /tekton/home/.gnupg
       script: |
         #!/usr/bin/env bash
         set -euxo pipefail

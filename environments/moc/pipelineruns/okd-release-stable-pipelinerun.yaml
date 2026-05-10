@@ -28,9 +28,6 @@ spec:
     value: 4.21.0-0.okd-scos-nightly
   - name: target-release-stream
     value: 4-scos-stable
-  podTemplate:
-    nodeSelector:
-      kubernetes.io/hostname: host-192-168-111-72
   pipelineRef:
     name: okd-release-pipeline
   timeouts:

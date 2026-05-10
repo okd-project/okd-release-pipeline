@@ -65,11 +65,20 @@ spec:
         PREV_MINOR="$((CURRENT_MINOR - 1))"
         PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
 
-        # Get the last 1 previous major.minor releases
-        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
+        # Build the previous minor stream name by replacing the current major.minor with the previous one
+        PREV_STREAM="$(echo "$RELEASE_STREAM" | sed "s/^${CURRENT_MAJOR_MINOR}\./${PREV_MAJOR_MINOR}./")"
+
+        # Get the last 1 previous major.minor releases (grep may match nothing; pipefail would exit otherwise)
+        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1 || true)"
+        if [[ -z "$PREV_RELEASES" ]]; then
+          PREV_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r "(.[\"${PREV_STREAM}\"] // [])[]" | head -n 1)"
+        fi
+        if [[ -z "$PREV_RELEASES" ]]; then
+          PREV_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r "(.[\"${PREV_STREAM%-nightly}\"] // [])[]" | head -n 1)"
+        fi
 
         # Get all current major.minor releases and combine them
-        CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\.")"
+        CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\." || true)"
         FILTERED_RELEASES=$(echo -e "$PREV_RELEASES\n$CURRENT_RELEASES" | grep -v '^$')
 
         # Convert the filtered releases to a comma-separated string

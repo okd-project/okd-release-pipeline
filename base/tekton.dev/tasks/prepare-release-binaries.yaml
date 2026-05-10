@@ -23,6 +23,10 @@ spec:
     - image: "quay.io/okd/tekton-worker:latest"
       name: "prepare-release-binaries"
       env:
+        - name: HOME
+          value: /tekton/home
+        - name: GNUPGHOME
+          value: /tekton/home/.gnupg
         - name: RELEASE_NAME
           value: $(params.release-name)
         - name: RELEASE_PULLSPEC
