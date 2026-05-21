@@ -28,22 +28,55 @@ spec:
 
         echo "[INFO] Promoting OKD releases - next: $next, stable: $stable"
 
+        # Drop spec.podTemplate from downloaded PipelineRuns. Upstream defaults may pin a
+        # bare-metal hostname (e.g. okd-project main); schedulers then fail on other clusters.
+        strip_pod_template_block() {
+          local f="$1"
+          local tmp
+          tmp="$(mktemp)"
+          awk '
+            /^  podTemplate:/ { skip=1; next }
+            skip && /^  [a-zA-Z]/ { skip=0 }
+            skip { next }
+            { print }
+          ' "$f" > "$tmp" && mv "$tmp" "$f"
+        }
+
+        apply_pipelinerun_manifest() {
+          local yaml_src="$1"
+          local temp_file
+          temp_file="$(mktemp)"
+
+          echo "[INFO] Resolving manifest: $yaml_src"
+          if [[ -f "$yaml_src" ]]; then
+            cp "$yaml_src" "$temp_file"
+          else
+            curl -fsSL "$yaml_src" -o "$temp_file"
+          fi
+
+          strip_pod_template_block "$temp_file"
+
+          echo "[INFO] Applying PipelineRun (podTemplate stripped if present)..."
+          oc create -f "$temp_file"
+          rm -f "$temp_file"
+        }
+
         # Check if next should be promoted
         if [[ "$next" == "true" ]]; then
           echo "[INFO] Applying: okd-release-next-pipelinerun.yaml from $next_yaml"
-          oc create -f "$next_yaml"
+          apply_pipelinerun_manifest "$next_yaml"
         fi
 
         # Sleep only if both releases are being promoted
         if [[ "$next" == "true" && "$stable" == "true" ]]; then
-        echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
-        sleep 1800
+          echo "[INFO] Sleeping for 30 minutes to let the first pipeline complete..."
+          sleep 1800
         fi
 
         # Check if stable should be promoted
         if [[ "$stable" == "true" ]]; then
           echo "[INFO] Applying: okd-release-stable-pipelinerun.yaml from $stable_yaml"
-          oc create -f "$stable_yaml"
+          apply_pipelinerun_manifest "$stable_yaml"
         fi
 
         echo "[INFO] OKD promotion jobs done!"
