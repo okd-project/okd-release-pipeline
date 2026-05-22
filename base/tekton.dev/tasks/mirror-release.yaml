@@ -61,24 +61,21 @@ spec:
         CURRENT_MAJOR="$(echo "$CURRENT_MAJOR_MINOR" | cut -d. -f1)"
         CURRENT_MINOR="$(echo "$CURRENT_MAJOR_MINOR" | cut -d. -f2)"
 
-        # Get previous major.minor version for upgrade path
-        PREV_MINOR="$((CURRENT_MINOR - 1))"
-        PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
-
-        # Build the previous minor stream name by replacing the current major.minor with the previous one
-        PREV_STREAM="$(echo "$RELEASE_STREAM" | sed "s/^${CURRENT_MAJOR_MINOR}\./${PREV_MAJOR_MINOR}./")"
-
-        # Get the last 1 previous major.minor releases (grep may match nothing; pipefail would exit otherwise)
-        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1 || true)"
-        if [[ -z "$PREV_RELEASES" ]]; then
-          PREV_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r "(.[\"${PREV_STREAM}\"] // [])[]" | head -n 1)"
+        # When minor is 0 (e.g. 5.0), simple subtraction produces -1.
+        # Instead, find the highest minor from the previous major in accepted streams.
+        if [[ "$CURRENT_MINOR" -eq 0 ]]; then
+          PREV_MAJOR="$((CURRENT_MAJOR - 1))"
+          PREV_MAJOR_MINOR="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR}\." | cut -d. -f1-2 | sort -t. -k2 -n | tail -n 1)"
+        else
+          PREV_MINOR="$((CURRENT_MINOR - 1))"
+          PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
         fi
-        if [[ -z "$PREV_RELEASES" ]]; then
-          PREV_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r "(.[\"${PREV_STREAM%-nightly}\"] // [])[]" | head -n 1)"
-        fi
+
+        # Get the last 1 previous major.minor releases
+        PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
 
         # Get all current major.minor releases and combine them
-        CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\." || true)"
+        CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\.")"
         FILTERED_RELEASES=$(echo -e "$PREV_RELEASES\n$CURRENT_RELEASES" | grep -v '^$')
 
         # Convert the filtered releases to a comma-separated string
