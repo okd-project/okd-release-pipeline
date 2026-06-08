@@ -101,6 +101,14 @@ spec:
             fi
             RELEASE_NAME="$OKD_VERSION$suffix"
             printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
+        elif [[ -z "$LAST_RELEASE_NAME" || "$LAST_RELEASE_NAME" == "null" ]]; then
+            if [[ "$(params.release-imagestream)" == *"next" ]]; then
+                suffix="-okd-scos.ec.0"
+            else
+                suffix="-okd-scos.0"
+            fi
+            RELEASE_NAME="$OKD_VERSION$suffix"
+            printf "%s" "$RELEASE_NAME" > $(results.target-release-name.path)
         else
             echo "No previous release found!"
         fi
