@@ -1,0 +1,1 @@
+oc delete pipelinerun -n okd-coreos --all
