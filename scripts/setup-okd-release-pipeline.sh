@@ -7,6 +7,14 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NAMESPACE="okd-coreos"
 
+sed_inplace() {
+    if [[ "$(uname)" == "Darwin" ]]; then
+        sed -i '' "$@"
+    else
+        sed -i "$@"
+    fi
+}
+
 echo "=========================================="
 echo "OKD Release Pipeline Setup Script"
 echo "=========================================="
@@ -37,9 +45,8 @@ echo "[2/8] Updating node selectors in PV and PipelineRun files..."
 for pv_file in "$SCRIPT_DIR/okd-release-pipeline/base/core/persistentvolumes/pipeline-release-"*"-pv.yaml"; do
     if [[ -f "$pv_file" ]]; then
         # Match any existing worker node pattern and replace
-        sed -i -E "s/- [a-zA-Z0-9_-]+-worker-[a-zA-Z0-9-]+/- $WORKER_NODE/" "$pv_file"
-        # Also handle simpler patterns like host-xxx
-        sed -i -E "s/- host-[0-9-]+/- $WORKER_NODE/" "$pv_file"
+        sed_inplace -E "s/- [a-zA-Z0-9_-]+-worker-[a-zA-Z0-9-]+/- $WORKER_NODE/" "$pv_file"
+        sed_inplace -E "s/- host-[0-9-]+/- $WORKER_NODE/" "$pv_file"
         echo "  Updated: $pv_file"
     fi
 done
@@ -47,7 +54,7 @@ done
 # Update PipelineRuns
 for pr_file in "$SCRIPT_DIR/okd-release-pipeline/environments/moc/pipelineruns/"*.yaml; do
     if [[ -f "$pr_file" ]]; then
-        sed -i "s/kubernetes.io\/hostname: .*/kubernetes.io\/hostname: $WORKER_NODE/" "$pr_file"
+        sed_inplace "s/kubernetes.io\/hostname: .*/kubernetes.io\/hostname: $WORKER_NODE/" "$pr_file"
         echo "  Updated: $pr_file"
     fi
 done

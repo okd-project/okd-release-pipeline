@@ -16,7 +16,10 @@ pr_delete_args=()
 if [[ $# -ge 1 ]]; then
   pr_delete_args=("$1")
 else
-  mapfile -t pr_delete_args < <(oc get pipelineruns.tekton.dev -n "${NS}" -l tekton.dev/pipeline=okd-release-pipeline -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true)
+  pr_delete_args=()
+  while IFS= read -r line; do
+    [[ -n "${line}" ]] && pr_delete_args+=("$line")
+  done < <(oc get pipelineruns.tekton.dev -n "${NS}" -l tekton.dev/pipeline=okd-release-pipeline -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null || true)
 fi
 
 for pr in "${pr_delete_args[@]}"; do
