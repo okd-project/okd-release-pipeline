@@ -64,17 +64,18 @@ spec:
           CURRENT_MINOR="$(echo "$CURRENT_MAJOR_MINOR" | cut -d. -f2)"
 
           # When minor is 0 (e.g. 5.0), simple subtraction produces -1.
-          # Instead, find the highest minor from the previous major in accepted streams.
+          # Instead, find the highest minor from the previous major's stream.
           if [[ "$CURRENT_MINOR" -eq 0 ]]; then
             PREV_MAJOR="$((CURRENT_MAJOR - 1))"
-            PREV_MAJOR_MINOR="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR}\." | cut -d. -f1-2 | sort -t. -k2 -n | tail -n 1)"
+            PREV_STREAM="$(echo "$TARGET_RELEASE_STREAM" | sed "s/^${CURRENT_MAJOR}/${PREV_MAJOR}/")"
+            PREV_STREAM_RELEASES="$(echo "$ACCEPTED_STREAMS" | jq -r ".[\"${PREV_STREAM}\"] // [] | .[]")"
+            PREV_MAJOR_MINOR="$(echo "$PREV_STREAM_RELEASES" | cut -d. -f1-2 | sort -t. -k2 -n | tail -n 1)"
+            PREV_RELEASES="$(echo "$PREV_STREAM_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
           else
             PREV_MINOR="$((CURRENT_MINOR - 1))"
             PREV_MAJOR_MINOR="${CURRENT_MAJOR}.${PREV_MINOR}"
+            PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
           fi
-
-          # Get the last 1 previous major.minor releases
-          PREV_RELEASES="$(echo "$ALL_RELEASES" | grep "^${PREV_MAJOR_MINOR}\." | head -n 1)"
 
           # Get all current major.minor releases and combine them
           CURRENT_RELEASES="$(echo "$ALL_RELEASES" | grep "^${CURRENT_MAJOR_MINOR}\.")"
