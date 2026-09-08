@@ -4,7 +4,7 @@ set -euo pipefail
 # OKD Release Pipeline Setup Script
 # Run this script after 'oc login' to set up the release pipeline on a new cluster
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 NAMESPACE="okd-coreos"
 
 sed_inplace() {
@@ -42,7 +42,7 @@ echo "Worker node: $WORKER_NODE"
 echo "[2/8] Updating node selectors in PV and PipelineRun files..."
 
 # Update PVs (match any worker node pattern)
-for pv_file in "$SCRIPT_DIR/okd-release-pipeline/base/core/persistentvolumes/pipeline-release-"*"-pv.yaml"; do
+for pv_file in "$SCRIPT_DIR/base/core/persistentvolumes/pipeline-release-"*"-pv.yaml"; do
     if [[ -f "$pv_file" ]]; then
         # Match any existing worker node pattern and replace
         sed_inplace -E "s/- [a-zA-Z0-9_-]+-worker-[a-zA-Z0-9-]+/- $WORKER_NODE/" "$pv_file"
@@ -52,7 +52,7 @@ for pv_file in "$SCRIPT_DIR/okd-release-pipeline/base/core/persistentvolumes/pip
 done
 
 # Update PipelineRuns
-for pr_file in "$SCRIPT_DIR/okd-release-pipeline/environments/moc/pipelineruns/"*.yaml; do
+for pr_file in "$SCRIPT_DIR/environments/moc/pipelineruns/"*.yaml; do
     if [[ -f "$pr_file" ]]; then
         sed_inplace "s/kubernetes.io\/hostname: .*/kubernetes.io\/hostname: $WORKER_NODE/" "$pr_file"
         echo "  Updated: $pr_file"
@@ -69,7 +69,7 @@ oc create namespace "$NAMESPACE" 2>/dev/null || echo "  Namespace already exists
 # Step 4: Apply secrets
 echo "[4/8] Applying secrets..."
 if [[ -d "$SCRIPT_DIR/secrets" ]]; then
-    oc apply -f "$SCRIPT_DIR/secrets/" -n "$NAMESPACE"
+    oc apply -f "$SCRIPT_DIR/secrets" -n "$NAMESPACE"
 else
     echo "  WARNING: secrets/ directory not found. Please apply secrets manually."
 fi
@@ -112,11 +112,11 @@ fi
 
 # Step 6: Apply kustomize base resources
 echo "[6/8] Applying kustomize base resources..."
-oc apply -k "$SCRIPT_DIR/okd-release-pipeline/environments/moc/"
+oc apply -k "$SCRIPT_DIR/environments/moc/"
 
 # Step 7: Apply release-promotions
 echo "[7/8] Applying release-promotions..."
-cd "$SCRIPT_DIR/okd-release-pipeline/release-promotions"
+cd "$SCRIPT_DIR/release-promotions"
 bash apply.sh
 cd "$SCRIPT_DIR"
 
@@ -150,7 +150,7 @@ echo "Pods in $NAMESPACE:"
 oc get pods -n "$NAMESPACE"
 echo ""
 echo "To trigger a pipeline run manually:"
-echo "  oc create -f okd-release-pipeline/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml -n $NAMESPACE"
+echo "  oc create -f $SCRIPT_DIR/environments/moc/pipelineruns/okd-release-stable-pipelinerun.yaml -n $NAMESPACE"
 echo ""
 echo "To trigger via EventListener:"
 echo "  oc run manual-promotion-\$(date +%Y%m%d-%H%M%S) --image=curlimages/curl --restart=Never \\"
