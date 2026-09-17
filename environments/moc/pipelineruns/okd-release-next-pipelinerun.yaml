@@ -25,7 +25,7 @@ spec:
   - name: release-mirror-pushspec
     value: quay.io/okd/scos-release
   - name: release-stream
-    value: 5.0.0-0.okd-scos-nightly
+    value: 5.1.0-0.okd-scos-nightly
   - name: target-release-stream
     value: 5-scos-next
   pipelineRef:

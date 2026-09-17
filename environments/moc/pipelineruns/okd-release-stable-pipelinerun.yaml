@@ -21,13 +21,13 @@ spec:
   - name: release-controller
     value: https://origin-release.ci.openshift.org
   - name: release-imagestream
-    value: release-scos
+    value: release-5-scos
   - name: release-mirror-pushspec
     value: quay.io/okd/scos-release
   - name: release-stream
-    value: 4.22.0-0.okd-scos-nightly
+    value: 5.0.0-0.okd-scos-nightly
   - name: target-release-stream
-    value: 4-scos-stable
+    value: 5-scos-stable
   pipelineRef:
     name: okd-release-pipeline
   timeouts:
