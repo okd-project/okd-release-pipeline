@@ -86,9 +86,13 @@ spec:
 
           if [[ -n "$PREVIOUS_RELEASES" ]]; then
             PREVIOUS_FLAG="--previous=$PREVIOUS_RELEASES"
+          else
+            echo "ERROR: no previous releases found for ${RELEASE_NAME}" >&2
+            exit 1
           fi
         else
-          echo "No accepted releases found for stream ${TARGET_RELEASE_STREAM}, proceeding without --previous"
+          echo "ERROR: no accepted releases found for stream ${TARGET_RELEASE_STREAM}" >&2
+          exit 1
         fi
 
         oc adm release new \
