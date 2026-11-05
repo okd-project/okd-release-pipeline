@@ -10,7 +10,6 @@
 * `okd-prow-sa-auth`
   * contains key `token`, which is a Service Account token for the Prow CI cluster, with permissions to tag release images. This token comes from the secret (sa-image-tagger-token-chsw6) stored in the app.ci cluster on the origin project.
 * `okd-matrix-bot-auth`, which contains an access token for Matrix (under key `token`)
-* `okd-graph-data-bot-token`, which contains a GitHub token for the bot account that opens [cincinnati-graph-data](https://github.com/okd-project/cincinnati-graph-data) PRs (under key `token`). A classic token with the `public_repo` scope is enough: the bot pushes to its own fork of the repository (created on first use) and opens PRs from it.
 
 2. Apply:
 ```bash
@@ -42,6 +41,11 @@ PipelineRun, so the release pipeline still finishes and sends its notification o
    stream (`*-scos-stable` → `stable`, `*-scos-next` → `candidate`) and whose `feeder.filter` matches the release. It
    makes one commit per channel and opens an `Enable <release> in <feeder> channels` PR. If no channel matches (e.g. the
    first release of a new minor), it fails rather than creating a channel.
+
+The PR is opened by the same GitHub App that creates the OKD GitHub releases (okd-tekton-token, via
+`get-github-access-token` and the `okd-githubapp-auth` secret). It pushes the `okd-release/<release>` branch straight to
+cincinnati-graph-data, so the app's okd-project installation must include that repository, with **Contents** and
+**Pull requests** read & write permissions.
 
 `propose-graph-update` needs `yq` and `git` in `quay.io/okd/tekton-worker`; rebuild and push the image from
 [tekton-worker-image](tekton-worker-image/) before enabling this.

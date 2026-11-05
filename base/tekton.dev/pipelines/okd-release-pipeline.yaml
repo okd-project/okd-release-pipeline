@@ -57,14 +57,6 @@ spec:
       name: graph-data-repo
       type: string
       default: "okd-project/cincinnati-graph-data"
-    - description: The GitHub owner/repo to push the PR branch to; defaults to the token owner's fork
-      name: graph-data-fork-repo
-      type: string
-      default: ""
-    - description: The Kubernetes secret containing the bot's GitHub token (key is token)
-      name: graph-data-token-secret
-      type: string
-      default: "okd-graph-data-bot-token"
   tasks:
     - name: pick-release
       taskRef:
@@ -202,10 +194,6 @@ spec:
           value: $(params.target-release-stream)
         - name: graph-data-repo
           value: $(params.graph-data-repo)
-        - name: graph-data-fork-repo
-          value: $(params.graph-data-fork-repo)
-        - name: graph-data-token-secret
-          value: $(params.graph-data-token-secret)
         - name: enable-notifications
           value: $(params.enable-notifications)
         - name: matrix-room

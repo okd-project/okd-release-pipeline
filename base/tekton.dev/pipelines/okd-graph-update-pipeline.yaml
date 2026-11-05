@@ -23,14 +23,18 @@ spec:
       name: graph-data-repo
       type: string
       default: "okd-project/cincinnati-graph-data"
-    - description: The GitHub owner/repo to push the PR branch to; defaults to the token owner's fork
-      name: graph-data-fork-repo
+    - description: ID of the GitHub App (okd-tekton-token) that opens the PR
+      name: github-app-id
       type: string
-      default: ""
-    - description: The Kubernetes secret containing the bot's GitHub token (key is token)
-      name: graph-data-token-secret
+      default: "309584"
+    - description: Installation ID of the GitHub App on the okd-project org
+      name: github-app-installation-id
       type: string
-      default: "okd-graph-data-bot-token"
+      default: "35633111"
+    - description: The Kubernetes secret containing the private key for the GitHub App
+      name: githubapp-secret-name
+      type: string
+      default: "okd-githubapp-auth"
     - description: Only print the proposed channel changes, without pushing or opening a PR
       name: dry-run
       type: string
@@ -63,6 +67,21 @@ spec:
           value: $(params.release-name)
         - name: timeout-seconds
           value: $(params.acceptance-timeout-seconds)
+    # Mint the token only once the release is accepted: installation tokens expire after an
+    # hour, and acceptance can take much longer than that.
+    - name: get-github-access-token
+      taskRef:
+        kind: Task
+        name: get-github-access-token
+      params:
+        - name: github-app-id
+          value: $(params.github-app-id)
+        - name: github-app-installation-id
+          value: $(params.github-app-installation-id)
+        - name: githubapp-secret-name
+          value: $(params.githubapp-secret-name)
+      runAfter:
+        - wait-for-release-acceptance
     - name: propose-graph-update
       taskRef:
         name: propose-graph-update
@@ -75,14 +94,12 @@ spec:
           value: $(params.release-controller)
         - name: graph-data-repo
           value: $(params.graph-data-repo)
-        - name: graph-data-fork-repo
-          value: $(params.graph-data-fork-repo)
-        - name: graph-data-token-secret
-          value: $(params.graph-data-token-secret)
+        - name: token
+          value: $(tasks.get-github-access-token.results.githubapp-token)
         - name: dry-run
           value: $(params.dry-run)
       runAfter:
-        - wait-for-release-acceptance
+        - get-github-access-token
   finally:
     - name: notify-matrix
       params:
