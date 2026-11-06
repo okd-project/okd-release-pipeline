@@ -4,7 +4,7 @@ LABEL maintainer="skhoury@redhat.com"
 RUN curl -Lo gh-cli.rpm "https://github.com/cli/cli/releases/download/v2.20.2/gh_2.20.2_linux_amd64.rpm"  && \
         dnf install -y jq git-core pinentry openssl ./gh-cli.rpm && \
         rm ./gh-cli.rpm
-RUN curl -Lo /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.54.1/yq_linux_amd64" && \
+RUN curl -Lo /usr/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.54.2/yq_linux_amd64" && \
         chmod +x /usr/bin/yq
 ADD oc.tar.xz /usr/bin/
 ADD kubectl.tar.xz /usr/bin/
