@@ -58,6 +58,7 @@ spec:
     - name: wait-for-release-acceptance
       taskRef:
         name: wait-for-release-acceptance
+      timeout: "12h30m"
       params:
         - name: release-controller
           value: $(params.release-controller)
