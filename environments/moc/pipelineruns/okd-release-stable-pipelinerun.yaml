@@ -8,6 +8,8 @@ spec:
     value: quay.io/okd/scos-content
   - name: enable-notifications
     value: "true"
+  - name: enable-graph-update
+    value: "true"
   - name: github-org-repo
     value: okd-project/okd
   - name: is-release-latest

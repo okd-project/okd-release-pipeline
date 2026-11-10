@@ -30,6 +30,37 @@ oc create -f environments/moc/pipelineruns/okd-release-next-pipelinerun.yaml
 
 ```
 
+## Cincinnati graph-data PRs
+When `enable-graph-update` is `"true"` (as in the `moc` PipelineRuns), the release pipeline finishes by starting an
+`okd-graph-update-pipeline` run for the promoted release. Because acceptance can take hours, this runs as its own
+PipelineRun, so the release pipeline still finishes and sends its notification on time:
+
+1. `wait-for-release-acceptance` polls the release controller until the release is `Accepted` in its target stream
+   (e.g. `5-scos-stable`). If the release is `Rejected`, or is not accepted within 12h, the run fails and no PR is opened.
+2. `propose-graph-update` adds the release to every channel in cincinnati-graph-data whose `feeder.name` matches the
+   stream (`*-scos-stable` → `stable`, `*-scos-next` → `candidate`) and whose `feeder.filter` matches the release. It
+   makes one commit per channel and opens an `Enable <release> in <feeder> channels` PR. If no channel matches (e.g. the
+   first release of a new minor), it fails rather than creating a channel.
+
+The PR is opened by the same GitHub App that creates the OKD GitHub releases (okd-tekton-token, via
+`get-github-access-token` and the `okd-githubapp-auth` secret). It pushes the `okd-release/<release>` branch straight to
+cincinnati-graph-data, so the app's okd-project installation must include that repository, with **Contents** and
+**Pull requests** read & write permissions.
+
+`propose-graph-update` needs `yq` and `git` in `quay.io/okd/tekton-worker`; rebuild and push the image from
+[tekton-worker-image](tekton-worker-image/) before enabling this.
+
+```bash
+# Follow the graph-data runs started by a release pipeline
+oc get pipelineruns -n okd-coreos -l okd.io/parent-pipelinerun=<release-pipelinerun-name>
+
+# Propose a graph update for an already accepted release, by hand (dry-run=true only prints the diff)
+tkn pipeline start okd-graph-update-pipeline -n okd-coreos \
+  --param release-name=5.0.0-okd-scos.2 \
+  --param target-release-stream=5-scos-stable \
+  --param dry-run=true
+```
+
 ## Annex - running a task individually
 ```bash
 tkn task start create-github-release \

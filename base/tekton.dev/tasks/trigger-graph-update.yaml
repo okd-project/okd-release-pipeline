@@ -1,0 +1,71 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: trigger-graph-update
+spec:
+  description: >-
+    Starts an okd-graph-update-pipeline run for a freshly promoted release. It runs as its own
+    PipelineRun because release acceptance can take hours, and the release pipeline should not
+    stay open (and hold its workspace) for that long.
+  params:
+    - description: The name of the promoted release (e.g., 5.0.0-okd-scos.2)
+      name: release-name
+      type: string
+    - description: The release stream the release was promoted to (e.g., 5-scos-stable, 5-scos-next)
+      name: target-release-stream
+      type: string
+    - description: The GitHub org/repo of the graph data to open the PR against
+      name: graph-data-repo
+      type: string
+      default: "okd-project/cincinnati-graph-data"
+    - name: enable-notifications
+      type: string
+      default: "false"
+    - name: matrix-room
+      type: string
+      default: ""
+    - name: matrix-endpoint
+      type: string
+      default: ""
+    - name: matrix-secret
+      type: string
+      default: "okd-matrix-bot-auth"
+  steps:
+    - image: "quay.io/okd/tekton-worker:latest"
+      name: "trigger-graph-update"
+      env:
+        - name: HOME
+          value: /tekton/home
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        oc create -n "$(context.pipelineRun.namespace)" -f - <<EOF
+        apiVersion: tekton.dev/v1beta1
+        kind: PipelineRun
+        metadata:
+          generateName: okd-graph-update-
+          labels:
+            okd.io/parent-pipelinerun: "$(context.pipelineRun.name)"
+        spec:
+          params:
+          - name: release-name
+            value: "$(params.release-name)"
+          - name: target-release-stream
+            value: "$(params.target-release-stream)"
+          - name: graph-data-repo
+            value: "$(params.graph-data-repo)"
+          - name: enable-notifications
+            value: "$(params.enable-notifications)"
+          - name: matrix-room
+            value: '$(params.matrix-room)'
+          - name: matrix-endpoint
+            value: "$(params.matrix-endpoint)"
+          - name: matrix-secret
+            value: "$(params.matrix-secret)"
+          pipelineRef:
+            name: okd-graph-update-pipeline
+          timeouts:
+            pipeline: 14h0m0s
+        EOF

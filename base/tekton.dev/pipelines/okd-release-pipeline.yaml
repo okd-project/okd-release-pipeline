@@ -49,6 +49,14 @@ spec:
       description: kubernetes secret containing the token to post messages
       type: string
       default: "okd-matrix-bot-auth"
+    - description: Open a cincinnati-graph-data PR once the promoted release is accepted
+      name: enable-graph-update
+      type: string
+      default: "false"
+    - description: The GitHub org/repo of the graph data to open the PR against
+      name: graph-data-repo
+      type: string
+      default: "okd-project/cincinnati-graph-data"
   tasks:
     - name: pick-release
       taskRef:
@@ -176,6 +184,30 @@ spec:
           value: okd-prow-sa-auth
       runAfter:
         - create-github-release
+    - name: trigger-graph-update
+      taskRef:
+        name: trigger-graph-update
+      params:
+        - name: release-name
+          value: $(tasks.pick-target-release-name.results.target-release-name)
+        - name: target-release-stream
+          value: $(params.target-release-stream)
+        - name: graph-data-repo
+          value: $(params.graph-data-repo)
+        - name: enable-notifications
+          value: $(params.enable-notifications)
+        - name: matrix-room
+          value: $(params.matrix-room)
+        - name: matrix-endpoint
+          value: $(params.matrix-endpoint)
+        - name: matrix-secret
+          value: $(params.matrix-secret)
+      when:
+        - input: $(params.enable-graph-update)
+          operator: in
+          values: ["true"]
+      runAfter:
+        - update-release-channel
   finally:
     - name: notify-matrix
       params:

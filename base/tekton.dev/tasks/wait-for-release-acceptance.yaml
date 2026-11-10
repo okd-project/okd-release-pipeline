@@ -1,0 +1,85 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: wait-for-release-acceptance
+spec:
+  params:
+    - description: The release controller to poll
+      name: release-controller
+      type: string
+      default: "https://amd64.origin.releases.ci.openshift.org"
+    - description: The release stream the release was promoted to (e.g., 5-scos-stable, 5-scos-next)
+      name: release-stream
+      type: string
+    - description: The name of the promoted release (e.g., 5.0.0-okd-scos.2)
+      name: release-name
+      type: string
+    - description: Seconds between polls of the release controller
+      name: poll-interval-seconds
+      type: string
+      default: "300"
+    - description: Seconds to wait for the release to be accepted before giving up
+      name: timeout-seconds
+      type: string
+      default: "43200"
+  steps:
+    - image: "quay.io/okd/tekton-worker:latest"
+      name: "wait-for-release-acceptance"
+      env:
+        - name: HOME
+          value: /tekton/home
+        - name: RELEASE_CONTROLLER
+          value: $(params.release-controller)
+        - name: RELEASE_STREAM
+          value: $(params.release-stream)
+        - name: RELEASE_NAME
+          value: $(params.release-name)
+        - name: POLL_INTERVAL
+          value: $(params.poll-interval-seconds)
+        - name: TIMEOUT
+          value: $(params.timeout-seconds)
+      script: |
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        # The release controller only creates the release tag once the imagestream has been
+        # tagged by update-release-channel, so a 404 means "not created yet", not a failure.
+        URL="${RELEASE_CONTROLLER%/}/api/v1/releasestream/${RELEASE_STREAM}/release/${RELEASE_NAME}"
+        DEADLINE="$(( $(date +%s) + TIMEOUT ))"
+        RESPONSE="$(mktemp)"
+
+        echo "[INFO] Waiting for ${RELEASE_NAME} to be accepted in ${RELEASE_STREAM}: ${URL}"
+        while true; do
+          CODE="$(curl -s -o "$RESPONSE" -w '%{http_code}' "$URL" || true)"
+          case "$CODE" in
+            200)
+              PHASE="$(jq -r '.phase // empty' "$RESPONSE")"
+              case "$PHASE" in
+                Accepted)
+                  echo "[INFO] ${RELEASE_NAME} is Accepted"
+                  exit 0
+                  ;;
+                Rejected|Failed)
+                  echo "[ERROR] ${RELEASE_NAME} is ${PHASE}; not proposing a graph update" >&2
+                  exit 1
+                  ;;
+                *)
+                  echo "[INFO] ${RELEASE_NAME} is ${PHASE:-in an unknown phase}, still waiting"
+                  ;;
+              esac
+              ;;
+            404)
+              echo "[INFO] ${RELEASE_NAME} does not exist in ${RELEASE_STREAM} yet, still waiting"
+              ;;
+            *)
+              echo "[WARN] Release controller returned HTTP ${CODE:-000}, retrying"
+              ;;
+          esac
+
+          if (( $(date +%s) >= DEADLINE )); then
+            echo "[ERROR] Timed out after ${TIMEOUT}s waiting for ${RELEASE_NAME} to be accepted" >&2
+            exit 1
+          fi
+          sleep "$POLL_INTERVAL"
+        done

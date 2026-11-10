@@ -5,6 +5,8 @@ resources:
 - ../../base/core/configmaps/
 - ../../base/core/persistentvolumes/
 - ../../base/core/persistentvolumeclaims/
+- ../../base/rbac.authorization.k8s.io/roles/
+- ../../base/rbac.authorization.k8s.io/rolebindings/
 - ../../base/storage.k8s.io/storageclasses/
 - ../../base/tekton.dev/pipelines/
 - ../../base/tekton.dev/tasks/

@@ -9,3 +9,6 @@ bases:
   - pick-release.yaml
   - pick-target-release-name.yaml
   - update-release-channel.yaml
+  - wait-for-release-acceptance.yaml
+  - propose-graph-update.yaml
+  - trigger-graph-update.yaml

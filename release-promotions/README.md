@@ -37,6 +37,9 @@ oc run okd-manual-promotion-$(date +%Y%m%d-%H%M%S) --image=curlimages/curl --res
 ### Automatic
 CronJob runs every Monday at 5:00 AM UTC, automatically promoting both releases with default YAML URLs.
 
+Each promoted release also opens a [cincinnati-graph-data](https://github.com/okd-project/cincinnati-graph-data) PR once
+the release controller accepts it; see [Cincinnati graph-data PRs](../README.md#cincinnati-graph-data-prs).
+
 ## Monitoring
 
 ```bash
@@ -45,4 +48,7 @@ oc get pods -n okd-coreos | grep okd-manual-promotion
 
 # View logs (example: okd-manual-promotion-20251226-143052)
 oc logs okd-manual-promotion-20251226-143052 -n okd-coreos -f
+
+# Graph-data PR runs (wait for acceptance, then open the PR)
+oc get pipelineruns -n okd-coreos | grep okd-graph-update
 ```

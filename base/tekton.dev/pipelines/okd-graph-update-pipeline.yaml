@@ -1,0 +1,121 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: okd-graph-update-pipeline
+spec:
+  params:
+    - description: The name of the promoted release (e.g., 5.0.0-okd-scos.2)
+      name: release-name
+      type: string
+    - description: The release stream the release was promoted to (e.g., 5-scos-stable, 5-scos-next)
+      name: target-release-stream
+      type: string
+    - description: The release controller to poll for acceptance
+      name: release-controller
+      type: string
+      default: "https://amd64.origin.releases.ci.openshift.org"
+    - description: Seconds to wait for the release to be accepted before giving up
+      name: acceptance-timeout-seconds
+      type: string
+      default: "43200"
+    - description: The GitHub org/repo of the graph data to open the PR against
+      name: graph-data-repo
+      type: string
+      default: "okd-project/cincinnati-graph-data"
+    - description: ID of the GitHub App (okd-tekton-token) that opens the PR
+      name: github-app-id
+      type: string
+      default: "309584"
+    - description: Installation ID of the GitHub App on the okd-project org
+      name: github-app-installation-id
+      type: string
+      default: "35633111"
+    - description: The Kubernetes secret containing the private key for the GitHub App
+      name: githubapp-secret-name
+      type: string
+      default: "okd-githubapp-auth"
+    - description: Only print the proposed channel changes, without pushing or opening a PR
+      name: dry-run
+      type: string
+      default: "false"
+    - name: enable-notifications
+      type: string
+      default: "false"
+    - name: matrix-room
+      description: room id (in the format !<ROOM_ID>:<SERVER_NAME>)
+      type: string
+      default: "!nStsazaBvZCZQHPWTY:fedoraproject.org"
+    - name: matrix-endpoint
+      description: endpoint to connect to
+      type: string
+      default: "matrix.org"
+    - name: matrix-secret
+      description: kubernetes secret containing the token to post messages
+      type: string
+      default: "okd-matrix-bot-auth"
+  tasks:
+    - name: wait-for-release-acceptance
+      taskRef:
+        name: wait-for-release-acceptance
+      timeout: "12h30m"
+      params:
+        - name: release-controller
+          value: $(params.release-controller)
+        - name: release-stream
+          value: $(params.target-release-stream)
+        - name: release-name
+          value: $(params.release-name)
+        - name: timeout-seconds
+          value: $(params.acceptance-timeout-seconds)
+    # Mint the token only once the release is accepted: installation tokens expire after an
+    # hour, and acceptance can take much longer than that.
+    - name: get-github-access-token
+      taskRef:
+        kind: Task
+        name: get-github-access-token
+      params:
+        - name: github-app-id
+          value: $(params.github-app-id)
+        - name: github-app-installation-id
+          value: $(params.github-app-installation-id)
+        - name: githubapp-secret-name
+          value: $(params.githubapp-secret-name)
+      runAfter:
+        - wait-for-release-acceptance
+    - name: propose-graph-update
+      taskRef:
+        name: propose-graph-update
+      params:
+        - name: release-name
+          value: $(params.release-name)
+        - name: release-stream
+          value: $(params.target-release-stream)
+        - name: release-controller
+          value: $(params.release-controller)
+        - name: graph-data-repo
+          value: $(params.graph-data-repo)
+        - name: token
+          value: $(tasks.get-github-access-token.results.githubapp-token)
+        - name: dry-run
+          value: $(params.dry-run)
+      runAfter:
+        - get-github-access-token
+  finally:
+    - name: notify-matrix
+      params:
+        - name: matrix-secret
+          value: $(params.matrix-secret)
+        - name: endpoint
+          value: $(params.matrix-endpoint)
+        - name: room
+          value: $(params.matrix-room)
+        - name: message
+          value: "PipelineRun $(context.pipelineRun.name) - graph-data PR for $(params.release-name): $(tasks.status)"
+      when:
+        - input: $(params.enable-notifications)
+          operator: in
+          values: ["true"]
+      taskRef:
+        kind: Task
+        name: notify-matrix
